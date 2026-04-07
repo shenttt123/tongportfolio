@@ -137,56 +137,55 @@ export function AboutSection() {
               <h3 className="text-[10px] font-mono uppercase tracking-[0.3em] text-brand-text-secondary">
                 Contact & Meta
               </h3>
-              <div className="space-y-4">
-                {content.contact.location?.trim() ? (
+              <div className="flex items-start gap-6">
+                {/* Contact links */}
+                <div className="space-y-4 flex-1 min-w-0">
+                  {content.contact.location?.trim() ? (
+                    <div className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors">
+                      <MapPin className="w-4 h-4 shrink-0" />
+                      <span className="text-xs font-light">{content.contact.location.trim()}</span>
+                    </div>
+                  ) : null}
                   <div className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors">
-                    <MapPin className="w-4 h-4 shrink-0" />
-                    <span className="text-xs font-light">{content.contact.location.trim()}</span>
+                    <Mail className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-light break-all">{content.contact.email}</span>
                   </div>
-                ) : null}
-                <div className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors">
-                  <Mail className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-light">{content.contact.email}</span>
+                  <a
+                    href={githubUrlFromField(content.contact.github)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
+                  >
+                    <Github className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-light">
+                      {displayUrlWithoutProtocol(githubUrlFromField(content.contact.github))}
+                    </span>
+                  </a>
+                  <a
+                    href={linkedinUrlFromField(content.contact.linkedin)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
+                  >
+                    <Linkedin className="w-4 h-4 shrink-0" />
+                    <span className="text-xs font-light">
+                      {displayUrlWithoutProtocol(linkedinUrlFromField(content.contact.linkedin))}
+                    </span>
+                  </a>
                 </div>
-                <a
-                  href={githubUrlFromField(content.contact.github)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
-                >
-                  <Github className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-light">
-                    {displayUrlWithoutProtocol(githubUrlFromField(content.contact.github))}
-                  </span>
-                </a>
-                <a
-                  href={linkedinUrlFromField(content.contact.linkedin)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
-                >
-                  <Linkedin className="w-4 h-4 shrink-0" />
-                  <span className="text-xs font-light">
-                    {displayUrlWithoutProtocol(linkedinUrlFromField(content.contact.linkedin))}
-                  </span>
-                </a>
-              </div>
-            </div>
-          </div>
 
-          <div className="w-full max-w-[12rem] sm:max-w-[13rem] aspect-square mx-auto lg:ml-auto lg:mr-0 bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative group shrink-0">
-            <img
-              key={portraitSrc}
-              src={portraitSrc}
-              alt="Tong Shen"
-              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-bg/60 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
-                Tong_Shen.sys / 2026
-              </p>
+                {/* Portrait — right of Contact & Meta */}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative group">
+                  <img
+                    key={portraitSrc}
+                    src={portraitSrc}
+                    alt="Tong Shen"
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-bg/60 to-transparent" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

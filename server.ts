@@ -158,7 +158,10 @@ async function startServer() {
     const raw = req.body?.path;
     const path = typeof raw === "string" ? raw : "";
     const ip = clientIp(req);
-    void visitorLogRepo.recordVisit(ip, path).catch((e) => console.error(e));
+    const isLocal = ip === "127.0.0.1" || ip === "::1" || ip.startsWith("::ffff:127.");
+    if (!isLocal) {
+      void visitorLogRepo.recordVisit(ip, path).catch((e) => console.error(e));
+    }
     res.status(204).send();
   });
 
@@ -231,6 +234,32 @@ async function startServer() {
     }
   });
 
+  // DELETE by ids array OR by ip string
+  app.delete("/api/admin/visitor-logs", async (req, res) => {
+    try {
+      const body = req.body ?? {};
+      // delete by list of ids
+      if (Array.isArray(body.ids) && body.ids.length > 0) {
+        const ids = (body.ids as unknown[])
+          .map((x) => parseInt(String(x), 10))
+          .filter((n) => !Number.isNaN(n));
+        const count = await visitorLogRepo.deleteVisitorLogsByIds(ids);
+        res.json({ deleted: count });
+        return;
+      }
+      // delete all for an ip
+      if (typeof body.ip === "string" && body.ip.trim()) {
+        const count = await visitorLogRepo.deleteVisitorLogsByIp(body.ip.trim());
+        res.json({ deleted: count });
+        return;
+      }
+      res.status(400).json({ error: "Provide either ids (array) or ip (string)" });
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to delete visitor logs", e);
+    }
+  });
+
   app.get("/api/admin/contact-inquiries", async (req, res) => {
     const q = parseInt(String(req.query.limit ?? "500"), 10);
     const limit = Number.isNaN(q) ? 500 : q;
@@ -238,7 +267,7 @@ async function startServer() {
       res.json(await contactInquiryRepo.listInquiries(limit));
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load contact inquiries" });
+      jsonError(res, 500, "Failed to load contact inquiries", e);
     }
   });
 

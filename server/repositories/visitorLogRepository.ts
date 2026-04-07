@@ -31,3 +31,15 @@ export async function listVisitorLogs(limit: number): Promise<VisitorLogDto[]> {
   });
   return rows.map(toDto);
 }
+
+export async function deleteVisitorLogsByIds(ids: number[]): Promise<number> {
+  if (ids.length === 0) return 0;
+  const result = await prisma.visitorLog.deleteMany({ where: { id: { in: ids } } });
+  return result.count;
+}
+
+export async function deleteVisitorLogsByIp(ip: string): Promise<number> {
+  if (!ip.trim()) return 0;
+  const result = await prisma.visitorLog.deleteMany({ where: { ip: ip.trim() } });
+  return result.count;
+}

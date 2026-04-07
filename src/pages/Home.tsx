@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { useHomeFullPageScroll } from "../hooks/useHomeFullPageScroll";
 import { ProjectsSection } from "../components/sections/ProjectsSection";
 import { NotesSection } from "../components/sections/NotesSection";
@@ -28,6 +28,8 @@ export function Home() {
   const [locationLabel, setLocationLabel] = useState("");
   const [heroTagline, setHeroTagline] = useState(DEFAULT_HERO_TAGLINE);
   const [shortIntroBody, setShortIntroBody] = useState(DEFAULT_SHORT_INTRO);
+  const [techTags, setTechTags] = useState<string[]>([]);
+  const [previewLinks, setPreviewLinks] = useState<{ label: string; url: string }[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -42,6 +44,16 @@ export function Home() {
         const si = home?.shortIntro != null ? String(home.shortIntro).trim() : "";
         setHeroTagline(ht || DEFAULT_HERO_TAGLINE);
         setShortIntroBody(si || DEFAULT_SHORT_INTRO);
+        if (Array.isArray(home?.technicalFocusTags)) {
+          setTechTags((home.technicalFocusTags as unknown[]).map(String).filter(Boolean));
+        }
+        if (Array.isArray(home?.contactPreviewLinks)) {
+          setPreviewLinks(
+            (home.contactPreviewLinks as { label: string; url: string }[]).filter(
+              (l) => l && typeof l.label === "string" && typeof l.url === "string"
+            )
+          );
+        }
         const loc = about?.contact?.location != null ? String(about.contact.location).trim() : "";
         setLocationLabel(loc);
       })
@@ -87,12 +99,46 @@ export function Home() {
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 leading-tight text-white">
-                Tong Shen <br />
+                Tong's Personal Portfolio<br />
                 <span className="text-brand-text-secondary">{heroTagline}</span>
               </h1>
               <p className="text-base md:text-lg text-brand-text-secondary max-w-xl mb-8 leading-relaxed font-light whitespace-pre-wrap">
                 {shortIntroBody}
               </p>
+              {/* Technical focus tags */}
+              {techTags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {techTags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="px-2.5 py-1 bg-brand-surface border border-brand-border rounded-sm text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Contact preview links */}
+              {previewLinks.length > 0 && (
+                <div className="flex flex-wrap items-center gap-4 mb-8">
+                  {previewLinks.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link.url}
+                      target={link.url.startsWith("mailto:") ? undefined : "_blank"}
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono uppercase tracking-widest text-brand-text-secondary hover:text-white border-b border-transparent hover:border-white/40 pb-0.5 transition-all flex items-center gap-1.5 group"
+                    >
+                      {link.label}
+                      {!link.url.startsWith("mailto:") && (
+                        <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </a>
+                  ))}
+                </div>
+              )}
+
               <div className="flex items-center gap-8">
                 <a
                   href="#projects"
@@ -136,7 +182,7 @@ export function Home() {
               {/* Technical Overlay */}
               <div className="absolute -bottom-4 -right-4 bg-brand-surface border border-brand-border p-3 rounded-sm hidden md:block max-w-[14rem]">
                 <div className="flex flex-col gap-1 font-mono text-[8px] text-brand-text-secondary uppercase tracking-widest">
-                  <span>UID: 0x5453_2026</span>
+                  <span>UID: 0x4188_8763</span>
                   {locationLabel ? (
                     <span className="normal-case tracking-normal break-words">BASE: {locationLabel}</span>
                   ) : null}

@@ -210,6 +210,20 @@ export function adminVisitorLogs(limit = 500): Promise<VisitorLogRow[]> {
   return apiJson<VisitorLogRow[]>(`/api/admin/visitor-logs?limit=${limit}`);
 }
 
+export function adminDeleteVisitorLogsByIds(ids: number[]): Promise<{ deleted: number }> {
+  return apiJson<{ deleted: number }>("/api/admin/visitor-logs", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
+  });
+}
+
+export function adminDeleteVisitorLogsByIp(ip: string): Promise<{ deleted: number }> {
+  return apiJson<{ deleted: number }>("/api/admin/visitor-logs", {
+    method: "DELETE",
+    body: JSON.stringify({ ip }),
+  });
+}
+
 export type ContactInquiryRow = {
   id: number;
   name: string;
