@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Book, Clock, Tag, ArrowRight, Hash } from "lucide-react";
 import { cn } from "../lib/utils";
+import { fetchJsonList } from "../lib/safeFetch";
 import { Note } from "../types";
 
 const categories = ["All", "ESP32", "FreeRTOS", "Networking", "Databases", "Algorithms"];
@@ -13,16 +14,9 @@ export function Notes() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/notes")
-      .then(res => res.json())
-      .then(data => {
-        setNotes(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch notes:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Note>("/api/notes")
+      .then(setNotes)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredNotes = notes.filter(note => {

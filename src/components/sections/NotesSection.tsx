@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Clock, Tag, ArrowRight } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { fetchJsonList } from "../../lib/safeFetch";
 import { Note } from "../../types";
 
 export function NotesSection() {
@@ -11,16 +12,9 @@ export function NotesSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/notes")
-      .then(res => res.json())
-      .then(data => {
-        setNotes(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch notes:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Note>("/api/notes")
+      .then(setNotes)
+      .finally(() => setLoading(false));
   }, []);
 
   const categories = ["All", ...Array.from(new Set(notes.map(note => note.category)))];

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Filter, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
+import { fetchJsonList } from "../lib/safeFetch";
 import { Project } from "../types";
 
 const categories = ["All", "Embedded", "IoT", "Full Stack", "Vision", "FPGA"];
@@ -14,16 +15,9 @@ export function Projects() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/projects")
-      .then(res => res.json())
-      .then(data => {
-        setProjects(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch projects:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Project>("/api/projects")
+      .then(setProjects)
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredProjects = projects.filter(project => {

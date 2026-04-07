@@ -2,22 +2,16 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Star, BookOpen, FileText, GraduationCap } from "lucide-react";
 import { ReadingItem } from "../../types";
+import { fetchJsonList } from "../../lib/safeFetch";
 
 export function ReadingSection() {
   const [items, setItems] = useState<ReadingItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/reading")
-      .then(res => res.json())
-      .then(data => {
-        setItems(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch reading list:", err);
-        setLoading(false);
-      });
+    fetchJsonList<ReadingItem>("/api/reading")
+      .then(setItems)
+      .finally(() => setLoading(false));
   }, []);
 
   const categories = ["Book", "Paper", "Course"];

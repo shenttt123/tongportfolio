@@ -13,6 +13,7 @@ import * as aboutRepo from "./server/repositories/aboutRepository";
 import * as visitorLogRepo from "./server/repositories/visitorLogRepository";
 import { clientIp } from "./server/lib/clientIp";
 import { adminBasicAuthMiddleware } from "./server/middleware/adminBasicAuth";
+import { jsonError } from "./server/lib/jsonError";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,7 +82,7 @@ async function startServer() {
       res.json(await siteHomeRepo.getSiteHome());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load site home" });
+      jsonError(res, 500, "Failed to load site home", e);
     }
   });
 
@@ -91,7 +92,7 @@ async function startServer() {
       res.json(await projectRepo.listPublishedProjects());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load projects" });
+      jsonError(res, 500, "Failed to load projects", e);
     }
   });
   app.get("/api/projects/:slug", async (req, res) => {
@@ -100,7 +101,7 @@ async function startServer() {
       project ? res.json(project) : res.status(404).json({ error: "Project not found" });
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load project" });
+      jsonError(res, 500, "Failed to load project", e);
     }
   });
 
@@ -109,7 +110,7 @@ async function startServer() {
       res.json(await noteRepo.listPublishedNotes());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load notes" });
+      jsonError(res, 500, "Failed to load notes", e);
     }
   });
   app.get("/api/notes/:slug", async (req, res) => {
@@ -118,7 +119,7 @@ async function startServer() {
       note ? res.json(note) : res.status(404).json({ error: "Note not found" });
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load note" });
+      jsonError(res, 500, "Failed to load note", e);
     }
   });
 
@@ -127,7 +128,7 @@ async function startServer() {
       res.json(await toolRepo.listPublicTools());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load tools" });
+      jsonError(res, 500, "Failed to load tools", e);
     }
   });
 
@@ -136,7 +137,7 @@ async function startServer() {
       res.json(await readingRepo.listPublicReading());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load reading list" });
+      jsonError(res, 500, "Failed to load reading list", e);
     }
   });
 
@@ -147,7 +148,7 @@ async function startServer() {
       res.json(await aboutRepo.getPublicAboutContent());
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: "Failed to load about" });
+      jsonError(res, 500, "Failed to load about", e);
     }
   });
 

@@ -2,22 +2,16 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Play, Activity, Camera, Cpu, ExternalLink } from "lucide-react";
 import { Demo } from "../types";
+import { fetchJsonList } from "../lib/safeFetch";
 
 export function Demos() {
   const [demos, setDemos] = useState<Demo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/demos")
-      .then(res => res.json())
-      .then(data => {
-        setDemos(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch demos:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Demo>("/api/demos")
+      .then(setDemos)
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

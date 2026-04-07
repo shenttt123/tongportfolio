@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Terminal, Code, Cpu, Settings, Activity, Zap } from "lucide-react";
 import { Tool } from "../types";
+import { fetchJsonList } from "../lib/safeFetch";
 
 const iconMap: Record<string, any> = {
   Activity,
@@ -17,16 +18,9 @@ export function Tools() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/tools")
-      .then(res => res.json())
-      .then(data => {
-        setTools(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch tools:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Tool>("/api/tools")
+      .then(setTools)
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

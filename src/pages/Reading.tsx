@@ -3,22 +3,16 @@ import { motion } from "motion/react";
 import { BookOpen, Link as LinkIcon, Star, CheckCircle2, Clock } from "lucide-react";
 import { ReadingItem } from "../types";
 import { cn } from "../lib/utils";
+import { fetchJsonList } from "../lib/safeFetch";
 
 export function Reading() {
   const [readingList, setReadingList] = useState<ReadingItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/reading")
-      .then(res => res.json())
-      .then(data => {
-        setReadingList(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch reading list:", err);
-        setLoading(false);
-      });
+    fetchJsonList<ReadingItem>("/api/reading")
+      .then(setReadingList)
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

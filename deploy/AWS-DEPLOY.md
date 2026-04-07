@@ -62,11 +62,14 @@ nano .env
 | `PORT` | 例：`3000`（仅本机监听，由 Nginx 反代） |
 | `ADMIN_AUTH_PASSWORD` | 后台 `/admin` 与 `/api/admin` 的 Basic Auth 密码 |
 | `ADMIN_AUTH_USER` | 可选，默认 `admin` |
-| `NODE_ENV` | 由 systemd 设为 `production` 即可 |
+| **不要写 `NODE_ENV` 到 `.env`** | Vite 在 `npm run build` 时会拒绝 `NODE_ENV=production`；生产环境用 **PM2**（`ecosystem.config.cjs` 已写）或 **systemd** 的 `Environment=NODE_ENV=production` |
 
 ```bash
 chmod 600 .env
+sudo chown ec2-user:ec2-user .env
 ```
+
+若 PM2 用 **ec2-user** 启动却仍报 `EACCES` 读 `.env`：多半是 `.env` 属主是 **root**（曾用 `sudo` 创建）。执行上面的 **`chown`**，并避免 **`sudo pm2 start`**。
 
 ---
 

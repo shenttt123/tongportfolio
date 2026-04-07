@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Cpu, Globe, Zap, Database, Terminal, Clock, Tag, Code, Monitor, Settings, Layers, Shield, Activity } from "lucide-react";
 import { Tool } from "../../types";
+import { fetchJsonList } from "../../lib/safeFetch";
 
 const iconMap: Record<string, any> = {
   Cpu, Globe, Zap, Database, Terminal, Clock, Tag, Code, Monitor, Settings, Layers, Shield, Activity
@@ -12,16 +13,9 @@ export function ToolsSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/tools")
-      .then(res => res.json())
-      .then(data => {
-        setTools(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch tools:", err);
-        setLoading(false);
-      });
+    fetchJsonList<Tool>("/api/tools")
+      .then(setTools)
+      .finally(() => setLoading(false));
   }, []);
 
   const categories = Array.from(new Set(tools.map(tool => tool.category)));
