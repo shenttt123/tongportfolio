@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import { cn } from "../lib/utils";
+import { cn, githubUrlFromField, linkedinUrlFromField } from "../lib/utils";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Github, Linkedin, Menu, X } from "lucide-react";
+import type { AboutContent } from "../types";
 
 const navItems = [
   { name: "Home", id: "home" },
@@ -15,10 +16,30 @@ const navItems = [
   { name: "Contact", id: "contact" },
 ];
 
+const socialBtn =
+  "flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md border border-brand-border text-brand-text-secondary hover:text-white hover:bg-brand-surface hover:border-white/25 active:scale-[0.97] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg";
+
 export function Navbar() {
   const location = useLocation();
   const [activeSection, setActiveSection] = useState("home");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [githubField, setGithubField] = useState("");
+  const [linkedinField, setLinkedinField] = useState("");
+
+  useEffect(() => {
+    fetch("/api/about")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: AboutContent | null) => {
+        if (data?.contact) {
+          setGithubField(String(data.contact.github ?? ""));
+          setLinkedinField(String(data.contact.linkedin ?? ""));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const githubHref = githubUrlFromField(githubField);
+  const linkedinHref = linkedinUrlFromField(linkedinField);
 
   useEffect(() => {
     if (location.pathname !== "/") return;
@@ -114,7 +135,7 @@ export function Navbar() {
           className="flex items-center gap-2 group min-w-0"
         >
           <div className="w-7 h-7 bg-white rounded-sm flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
-            <span className="text-black font-mono font-bold text-[10px]">AR</span>
+            <span className="text-black font-mono font-bold text-[10px]">TS</span>
           </div>
           <span className="font-mono text-[11px] tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity uppercase">
             Tong_Shen.sys
@@ -138,7 +159,7 @@ export function Navbar() {
               {activeSection === item.id && (
                 <motion.div
                   layoutId="nav-underline"
-                  className="absolute bottom-0 left-3 right-3 h-px bg-white"
+                  className="absolute bottom-0 left-3 right-3 h-px bg-white theme-nav-active-line"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -146,7 +167,27 @@ export function Navbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1">
+            <a
+              href={githubHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub profile"
+              className={socialBtn}
+            >
+              <Github className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.5} />
+            </a>
+            <a
+              href={linkedinHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn profile"
+              className={socialBtn}
+            >
+              <Linkedin className="h-[18px] w-[18px] sm:h-5 sm:w-5" strokeWidth={1.5} />
+            </a>
+          </div>
           <div className="hidden sm:flex items-center gap-2 px-2 py-0.5 bg-brand-surface border border-brand-border rounded-sm">
             <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
             <span className="text-[8px] font-mono text-brand-text-secondary uppercase tracking-[0.2em]">
@@ -172,7 +213,7 @@ export function Navbar() {
             type="button"
             aria-hidden
             tabIndex={-1}
-            className="fixed inset-0 top-14 z-40 bg-black/70 lg:hidden cursor-default"
+            className="fixed inset-0 top-14 z-40 bg-black/70 theme-mobile-backdrop lg:hidden cursor-default"
             onClick={() => setMobileOpen(false)}
           />
           <div

@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAdminSaveFeedback } from "../../context/AdminSaveFeedbackContext";
-import { adminSiteHome, type SiteHomeAdmin, parseListInput } from "../../lib/adminContentApi";
+import {
+  adminSiteHome,
+  uploadSitePortraitImage,
+  type SiteHomeAdmin,
+  parseListInput,
+} from "../../lib/adminContentApi";
 import { formatApiError } from "../../lib/adminProjectsApi";
 
 const input =
@@ -31,6 +36,7 @@ export function AdminDashboardHome() {
   const [saving, setSaving] = useState(false);
 
   const [portraitImagePath, setPortraitImagePath] = useState("");
+  const [portraitUploading, setPortraitUploading] = useState(false);
   const [shortIntro, setShortIntro] = useState("");
   const [heroText, setHeroText] = useState("");
   const [tagsText, setTagsText] = useState("");
@@ -55,6 +61,24 @@ export function AdminDashboardHome() {
   useEffect(() => {
     load();
   }, [load]);
+
+  async function onPortraitFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setPortraitUploading(true);
+    setErr(null);
+    try {
+      const { portraitImagePath: path } = await uploadSitePortraitImage(file);
+      setPortraitImagePath(path);
+      notify(true, "Portrait uploaded — click Save to publish.");
+    } catch (err) {
+      setErr(formatApiError(err));
+      notify(false, formatApiError(err));
+    } finally {
+      setPortraitUploading(false);
+    }
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -97,8 +121,37 @@ export function AdminDashboardHome() {
       )}
       <form onSubmit={save} className="max-w-2xl space-y-6">
         <div>
-          <label className={label}>Portrait / profile image URL</label>
-          <input className={input} value={portraitImagePath} onChange={(e) => setPortraitImagePath(e.target.value)} />
+          <label className={label}>Portrait / profile image</label>
+          <p className="text-xs text-brand-text-secondary mb-2">
+            Upload a file (stored on this server under <code className="text-[10px]">data/uploads/site/</code>, URL like{" "}
+            <code className="text-[10px]">/uploads/site/portrait-….jpg</code>), or paste an external image URL below.
+          </p>
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded border border-white/20 bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="sr-only"
+                disabled={portraitUploading}
+                onChange={onPortraitFileChange}
+              />
+              {portraitUploading ? "Uploading…" : "Choose image file"}
+            </label>
+            {portraitImagePath.trim() ? (
+              <img
+                src={portraitImagePath.trim()}
+                alt="Portrait preview"
+                className="h-20 w-20 rounded object-cover border border-brand-border"
+              />
+            ) : null}
+          </div>
+          <label className={`${label} mt-1`}>Image URL (optional override)</label>
+          <input
+            className={input}
+            value={portraitImagePath}
+            onChange={(e) => setPortraitImagePath(e.target.value)}
+            placeholder="/uploads/site/portrait-….jpg or https://…"
+          />
         </div>
         <div>
           <label className={label}>Short intro</label>

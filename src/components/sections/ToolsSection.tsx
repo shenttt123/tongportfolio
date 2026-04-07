@@ -21,7 +21,7 @@ export function ToolsSection() {
   const categories = Array.from(new Set(tools.map(tool => tool.category)));
 
   return (
-    <section id="tools" className="py-24 border-t border-brand-border">
+    <section id="tools" className="min-h-[100dvh] box-border py-24 border-t border-brand-border">
       <header className="mb-16 max-w-3xl">
         <div className="flex items-center gap-3 mb-6">
           <span className="w-2 h-2 bg-white/20 rounded-full" />
@@ -30,7 +30,7 @@ export function ToolsSection() {
           </h2>
         </div>
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-white">
-          Tools & Workflow.
+          Tools & Workflow
         </h1>
         <p className="text-base md:text-lg text-brand-text-secondary leading-relaxed font-light">
           A curated list of development tools, software, and hardware 

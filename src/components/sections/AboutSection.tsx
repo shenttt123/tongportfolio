@@ -37,7 +37,7 @@ export function AboutSection() {
 
   if (loading || !content) {
     return (
-      <section id="about" className="py-24 border-t border-brand-border text-center">
+      <section id="about" className="min-h-[100dvh] box-border py-24 border-t border-brand-border text-center">
         <p className="text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary animate-pulse">
           LOADING_PROFILE...
         </p>
@@ -46,7 +46,7 @@ export function AboutSection() {
   }
 
   return (
-    <section id="about" className="py-24 border-t border-brand-border">
+    <section id="about" className="min-h-[100dvh] box-border py-24 border-t border-brand-border">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
         {/* Left Column: Bio & Focus */}
         <div className="lg:col-span-7 space-y-16">
@@ -58,7 +58,7 @@ export function AboutSection() {
               </h2>
             </div>
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-8 text-white">
-              Tong Shen.
+              Tong Shen
             </h1>
             <div className="prose prose-invert max-w-none">
               <p className="text-lg text-brand-text-secondary leading-relaxed font-light mb-8">
@@ -174,7 +174,7 @@ export function AboutSection() {
             </div>
           </div>
 
-          <div className="aspect-square bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative group">
+          <div className="w-full max-w-[12rem] sm:max-w-[13rem] aspect-square mx-auto lg:ml-auto lg:mr-0 bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative group shrink-0">
             <img
               key={portraitSrc}
               src={portraitSrc}
@@ -183,8 +183,8 @@ export function AboutSection() {
               referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-bg/60 to-transparent" />
-            <div className="absolute bottom-6 left-6">
-              <p className="text-[10px] font-mono text-brand-text-secondary uppercase tracking-widest">
+            <div className="absolute bottom-4 left-4 right-4">
+              <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
                 Tong_Shen.sys / 2026
               </p>
             </div>

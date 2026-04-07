@@ -117,3 +117,16 @@ model VisitorLog {
 
   @@index([createdAt])
 }
+
+/// Contact form submissions from the public site (bottom of /#contact)
+model ContactInquiry {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String   @default("")
+  message   String
+  ip        String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

@@ -52,7 +52,7 @@ export function Projects() {
           </h2>
         </div>
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-white">
-          Technical Works.
+          Technical Works
         </h1>
         <p className="text-base md:text-lg text-brand-text-secondary leading-relaxed font-light">
           A structured index of systems engineering projects, ranging from 

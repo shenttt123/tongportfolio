@@ -28,7 +28,7 @@ export function ProjectsSection() {
   });
 
   return (
-    <section id="projects" className="py-24 border-t border-brand-border">
+    <section id="projects" className="min-h-[100dvh] box-border py-24 border-t border-brand-border">
       <header className="mb-16 max-w-3xl">
         <div className="flex items-center gap-3 mb-6">
           <span className="w-2 h-2 bg-white/20 rounded-full" />
@@ -37,7 +37,7 @@ export function ProjectsSection() {
           </h2>
         </div>
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-white">
-          Technical Works.
+          Technical Works
         </h1>
         <p className="text-base md:text-lg text-brand-text-secondary leading-relaxed font-light">
           A structured index of systems engineering projects. Each entry represents a specific technical challenge.

@@ -10,3 +10,7 @@ coverage/
 # SQLite DB files only — schema + seed must stay in git
 prisma/*.db
 prisma/*.db-journal
+
+# Runtime uploads (portrait etc.); keep directory via data/uploads/.gitkeep
+data/uploads/*
+!data/uploads/.gitkeep

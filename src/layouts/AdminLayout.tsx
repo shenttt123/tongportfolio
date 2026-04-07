@@ -13,6 +13,7 @@ import { AdminReadingPage } from "../pages/admin/AdminReadingPage";
 import { AdminDemosPlaceholder } from "../pages/admin/AdminDemosPlaceholder";
 import { AdminAboutPage } from "../pages/admin/AdminAboutPage";
 import { AdminVisitorHistory } from "../pages/admin/AdminVisitorHistory";
+import { AdminContactInquiries } from "../pages/admin/AdminContactInquiries";
 
 function AdminShell() {
   const location = useLocation();
@@ -116,6 +117,7 @@ export function AdminLayout() {
         <Route path="reading" element={<AdminReadingPage />} />
         <Route path="demos" element={<AdminDemosPlaceholder />} />
         <Route path="about" element={<AdminAboutPage />} />
+        <Route path="contact-inquiries" element={<AdminContactInquiries />} />
         <Route path="visitor-history" element={<AdminVisitorHistory />} />
         <Route path="*" element={<Navigate to="/admin/home" replace />} />
       </Route>

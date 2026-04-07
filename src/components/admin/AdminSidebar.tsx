@@ -13,6 +13,7 @@ export const ADMIN_NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/admin/reading", label: "Reading" },
   { to: "/admin/demos", label: "Demos" },
   { to: "/admin/about", label: "About" },
+  { to: "/admin/contact-inquiries", label: "Contact" },
   { to: "/admin/visitor-history", label: "Visitors" },
 ];
 

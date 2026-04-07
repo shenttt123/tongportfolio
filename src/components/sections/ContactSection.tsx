@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
-import { Mail, Github, Linkedin, ArrowRight, Send } from "lucide-react";
+import { Mail, Github, Linkedin, Send } from "lucide-react";
 import type { AboutContent } from "../../types";
 import { displayUrlWithoutProtocol, githubUrlFromField, linkedinUrlFromField } from "../../lib/utils";
 
 export function ContactSection() {
   const [contact, setContact] = useState<AboutContent["contact"] | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendErr, setSendErr] = useState<string | null>(null);
+  const [sendOk, setSendOk] = useState(false);
 
   useEffect(() => {
     fetch("/api/about")
@@ -19,8 +25,36 @@ export function ContactSection() {
   const gh = contact ? githubUrlFromField(contact.github) : "";
   const li = contact ? linkedinUrlFromField(contact.linkedin) : "";
 
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSendErr(null);
+    setSendOk(false);
+    setSending(true);
+    try {
+      const res = await fetch("/api/contact/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, subject, message }),
+      });
+      const data = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        setSendErr(data?.error ?? `Request failed (${res.status})`);
+        return;
+      }
+      setSendOk(true);
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch {
+      setSendErr("Network error — try again later.");
+    } finally {
+      setSending(false);
+    }
+  }
+
   return (
-    <section id="contact" className="py-32 border-t border-brand-border">
+    <section id="contact" className="min-h-[100dvh] box-border py-32 border-t border-brand-border">
       <div className="max-w-4xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-5 space-y-8">
@@ -42,7 +76,11 @@ export function ContactSection() {
             
             <div className="space-y-6 pt-8">
               <a
-                href={contact?.email ? `mailto:${contact.email}` : "#contact"}
+                href={
+                  contact?.email?.trim()
+                    ? `mailto:${contact.email.trim()}`
+                    : "#contact"
+                }
                 className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
               >
                 <div className="w-10 h-10 bg-brand-surface border border-brand-border rounded-sm flex items-center justify-center group-hover:border-white/20 transition-all">
@@ -50,8 +88,8 @@ export function ContactSection() {
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">Email</span>
-                  <span className="text-sm font-light truncate">
-                    {contact?.email ?? "…"}
+                  <span className="text-sm font-light break-all">
+                    {contact?.email?.trim() || "Use the form on the right →"}
                   </span>
                 </div>
               </a>
@@ -94,50 +132,78 @@ export function ContactSection() {
           
           <div className="lg:col-span-7">
             <div className="p-8 md:p-12 bg-brand-surface border border-brand-border rounded-sm">
-              <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-8" onSubmit={onSubmit}>
+                {sendErr && (
+                  <div className="rounded border border-red-900/50 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+                    {sendErr}
+                  </div>
+                )}
+                {sendOk && (
+                  <div className="rounded border border-emerald-800/60 bg-emerald-950/40 px-4 py-3 text-sm text-emerald-100">
+                    Message received — thank you. I will get back to you when I can.
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">Name</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       className="w-full bg-brand-bg border border-brand-border rounded-sm px-4 py-3 text-sm font-light focus:outline-none focus:border-white/20 transition-all"
                       placeholder="Your Name"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">Email</label>
-                    <input 
-                      type="email" 
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full bg-brand-bg border border-brand-border rounded-sm px-4 py-3 text-sm font-light focus:outline-none focus:border-white/20 transition-all"
                       placeholder="your@email.com"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">Subject</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
+                    name="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-border rounded-sm px-4 py-3 text-sm font-light focus:outline-none focus:border-white/20 transition-all"
                     placeholder="Project Inquiry"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">Message</label>
-                  <textarea 
+                  <textarea
+                    name="message"
+                    required
                     rows={6}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-border rounded-sm px-4 py-3 text-sm font-light focus:outline-none focus:border-white/20 transition-all resize-none"
                     placeholder="Tell me about your project..."
                   />
                 </div>
-                
-                <button 
+
+                <button
                   type="submit"
-                  className="w-full py-4 bg-white text-black font-mono text-[10px] uppercase tracking-[0.2em] rounded-sm hover:bg-opacity-90 transition-all flex items-center justify-center gap-3 group"
+                  disabled={sending}
+                  className="w-full py-4 bg-white text-black font-mono text-[10px] uppercase tracking-[0.2em] rounded-sm hover:bg-opacity-90 transition-all flex items-center justify-center gap-3 group disabled:opacity-50"
                 >
-                  Send Message
-                  <Send className="w-3 h-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  {sending ? "Sending…" : "Send Message"}
+                  {!sending ? <Send className="w-3 h-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> : null}
                 </button>
               </form>
             </div>

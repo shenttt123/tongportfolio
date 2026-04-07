@@ -11,9 +11,11 @@ import * as toolRepo from "./server/repositories/toolRepository";
 import * as readingRepo from "./server/repositories/readingRepository";
 import * as aboutRepo from "./server/repositories/aboutRepository";
 import * as visitorLogRepo from "./server/repositories/visitorLogRepository";
+import * as contactInquiryRepo from "./server/repositories/contactInquiryRepository";
 import { clientIp } from "./server/lib/clientIp";
 import { adminBasicAuthMiddleware } from "./server/middleware/adminBasicAuth";
 import { jsonError } from "./server/lib/jsonError";
+import { sitePortraitMulter, SITE_PORTRAIT_PUBLIC_PREFIX } from "./server/lib/sitePortraitUpload";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -160,6 +162,30 @@ async function startServer() {
     res.status(204).send();
   });
 
+  app.post("/api/contact/inquiry", async (req, res) => {
+    try {
+      const body = req.body ?? {};
+      const name = typeof body.name === "string" ? body.name : "";
+      const email = typeof body.email === "string" ? body.email : "";
+      const subject = typeof body.subject === "string" ? body.subject : "";
+      const message = typeof body.message === "string" ? body.message : "";
+      const ip = clientIp(req);
+      const row = await contactInquiryRepo.createInquiry({ name, email, subject, message, ip });
+      res.status(201).json({ ok: true, id: row.id });
+    } catch (e) {
+      if (e instanceof Error && e.message === "VALIDATION") {
+        res.status(400).json({ error: "Name, email, and message are required" });
+        return;
+      }
+      if (e instanceof Error && e.message === "INVALID_EMAIL") {
+        res.status(400).json({ error: "Invalid email address" });
+        return;
+      }
+      console.error(e);
+      jsonError(res, 500, "Could not save inquiry", e);
+    }
+  });
+
   // --- Admin: Site home ---
   app.get("/api/admin/site-home", async (_req, res) => {
     try {
@@ -178,6 +204,22 @@ async function startServer() {
     }
   });
 
+  app.post("/api/admin/upload/site-portrait", (req, res) => {
+    sitePortraitMulter.single("file")(req, res, (err: unknown) => {
+      if (err) {
+        const msg = err instanceof Error ? err.message : "Upload failed";
+        res.status(400).json({ error: msg });
+        return;
+      }
+      if (!req.file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return;
+      }
+      const portraitImagePath = `${SITE_PORTRAIT_PUBLIC_PREFIX}/${req.file.filename}`;
+      res.json({ portraitImagePath });
+    });
+  });
+
   app.get("/api/admin/visitor-logs", async (req, res) => {
     const q = parseInt(String(req.query.limit ?? "500"), 10);
     const limit = Number.isNaN(q) ? 500 : q;
@@ -186,6 +228,17 @@ async function startServer() {
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: "Failed to load visitor logs" });
+    }
+  });
+
+  app.get("/api/admin/contact-inquiries", async (req, res) => {
+    const q = parseInt(String(req.query.limit ?? "500"), 10);
+    const limit = Number.isNaN(q) ? 500 : q;
+    try {
+      res.json(await contactInquiryRepo.listInquiries(limit));
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: "Failed to load contact inquiries" });
     }
   });
 
@@ -529,6 +582,9 @@ async function startServer() {
   });
 
   const httpServer = http.createServer(app);
+
+  const uploadsStaticRoot = path.join(process.cwd(), "data", "uploads");
+  app.use("/uploads", express.static(uploadsStaticRoot));
 
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

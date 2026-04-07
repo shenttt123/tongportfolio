@@ -17,7 +17,7 @@ export function ReadingSection() {
   const categories = ["Book", "Paper", "Course"];
 
   return (
-    <section id="reading" className="py-24 border-t border-brand-border">
+    <section id="reading" className="min-h-[100dvh] box-border py-24 border-t border-brand-border">
       <header className="mb-16 max-w-3xl">
         <div className="flex items-center gap-3 mb-6">
           <span className="w-2 h-2 bg-white/20 rounded-full" />
@@ -26,7 +26,7 @@ export function ReadingSection() {
           </h2>
         </div>
         <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-white">
-          Reading & Learning.
+          Reading & Learning
         </h1>
         <p className="text-base md:text-lg text-brand-text-secondary leading-relaxed font-light">
           A collection of books, research papers, and courses that have 

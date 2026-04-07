@@ -34,7 +34,7 @@ export function Footer() {
           <div className="col-span-2">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center">
-                <span className="text-black font-mono font-bold text-[10px]">AR</span>
+                <span className="text-black font-mono font-bold text-[10px]">TS</span>
               </div>
               <span className="font-mono text-xs tracking-tighter opacity-60 uppercase">
                 Tong_Shen.sys
@@ -73,10 +73,14 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={contact?.email ? `mailto:${contact.email}` : "#"}
-                  className="text-sm text-brand-text-secondary hover:text-white transition-colors font-light"
+                  href={
+                    contact?.email?.trim()
+                      ? `mailto:${contact.email.trim()}`
+                      : "/#contact"
+                  }
+                  className="text-sm text-brand-text-secondary hover:text-white transition-colors font-light break-all"
                 >
-                  Email
+                  {contact?.email?.trim() ? contact.email.trim() : "Contact form →"}
                 </a>
               </li>
             </ul>

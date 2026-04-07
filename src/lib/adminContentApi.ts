@@ -54,6 +54,26 @@ export const adminSiteHome = {
     }),
 };
 
+/** Multipart upload; saves under `data/uploads/site` and returns a path like `/uploads/site/portrait-….jpg`. */
+export async function uploadSitePortraitImage(file: File): Promise<{ portraitImagePath: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch("/api/admin/upload/site-portrait", {
+    method: "POST",
+    body: form,
+  });
+  const data = await readJson(res);
+  if (!res.ok) {
+    const errObj =
+      data && typeof data === "object"
+        ? (data as Record<string, unknown>)
+        : { error: `HTTP ${res.status}` };
+    if (!("error" in errObj)) (errObj as { error: string }).error = `HTTP ${res.status}`;
+    throw { status: res.status, data: errObj };
+  }
+  return data as { portraitImagePath: string };
+}
+
 export type NoteAdmin = {
   id: number;
   title: string;
@@ -188,6 +208,20 @@ export type VisitorLogRow = {
 
 export function adminVisitorLogs(limit = 500): Promise<VisitorLogRow[]> {
   return apiJson<VisitorLogRow[]>(`/api/admin/visitor-logs?limit=${limit}`);
+}
+
+export type ContactInquiryRow = {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  ip: string;
+  createdAt: string;
+};
+
+export function adminContactInquiries(limit = 500): Promise<ContactInquiryRow[]> {
+  return apiJson<ContactInquiryRow[]>(`/api/admin/contact-inquiries?limit=${limit}`);
 }
 
 export { parseListInput };

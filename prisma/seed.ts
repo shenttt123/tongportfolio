@@ -50,7 +50,7 @@ async function main() {
   const siteHomeSeed = {
     portraitImagePath: "https://picsum.photos/seed/engineer-portrait/400/400",
     shortIntro: "Embedded systems engineer — firmware, protocols, and reliable hardware.",
-    heroText: "Building deterministic systems at the edge.",
+    heroText: "Building deterministic systems at the edge",
     technicalFocusTags: ["Firmware", "RTOS", "Embedded Linux", "Hardware bring-up"],
     contactPreviewLinks: [
       { label: "Email", url: "mailto:tsh9714@gmail.com" },

@@ -2,9 +2,17 @@ import { Outlet } from "react-router-dom";
 import { AnimatePresence } from "motion/react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
-export function PublicLayout() {
+import { SiteThemeProvider, useSiteTheme } from "../context/SiteThemeContext";
+import { ThemeLightSwitch } from "../components/ThemeLightSwitch";
+
+function PublicLayoutInner() {
+  const { mode } = useSiteTheme();
+
   return (
-    <div className="min-h-screen flex flex-col bg-brand-bg text-white selection:bg-white selection:text-black">
+    <div
+      data-theme={mode}
+      className="min-h-screen flex flex-col bg-brand-bg text-brand-text-primary"
+    >
       <Navbar />
       <main className="flex-grow pt-14">
         <AnimatePresence mode="wait">
@@ -12,6 +20,15 @@ export function PublicLayout() {
         </AnimatePresence>
       </main>
       <Footer />
+      <ThemeLightSwitch />
     </div>
+  );
+}
+
+export function PublicLayout() {
+  return (
+    <SiteThemeProvider>
+      <PublicLayoutInner />
+    </SiteThemeProvider>
   );
 }

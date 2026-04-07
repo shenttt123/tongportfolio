@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
+import { useHomeFullPageScroll } from "../hooks/useHomeFullPageScroll";
 import { ProjectsSection } from "../components/sections/ProjectsSection";
 import { NotesSection } from "../components/sections/NotesSection";
 import { ToolsSection } from "../components/sections/ToolsSection";
@@ -19,6 +21,9 @@ const DEFAULT_SHORT_INTRO =
   "of real-time performance and long-term system stability.";
 
 export function Home() {
+  const { pathname } = useLocation();
+  useHomeFullPageScroll(pathname === "/");
+
   const [heroPortraitSrc, setHeroPortraitSrc] = useState(DEFAULT_HERO_PORTRAIT);
   const [locationLabel, setLocationLabel] = useState("");
   const [heroTagline, setHeroTagline] = useState(DEFAULT_HERO_TAGLINE);
@@ -65,7 +70,7 @@ export function Home() {
       className="max-w-7xl mx-auto px-6"
     >
       {/* Hero Section - Understated & Refined */}
-      <section id="home" className="min-h-[80vh] flex flex-col justify-center py-12 md:py-20">
+      <section id="home" className="min-h-[100dvh] flex flex-col justify-center py-12 md:py-20 box-border">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
             <motion.div
@@ -82,7 +87,7 @@ export function Home() {
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-medium tracking-tight mb-6 leading-tight text-white">
-                Tong Shen. <br />
+                Tong Shen <br />
                 <span className="text-brand-text-secondary">{heroTagline}</span>
               </h1>
               <p className="text-base md:text-lg text-brand-text-secondary max-w-xl mb-8 leading-relaxed font-light whitespace-pre-wrap">
@@ -116,9 +121,9 @@ export function Home() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              className="relative group"
+              className="relative group w-full max-w-[min(100%,22rem)]"
             >
-              <div className="w-48 h-60 md:w-64 md:h-80 bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative">
+              <div className="aspect-square w-full bg-brand-surface border border-brand-border rounded-sm overflow-hidden relative">
                 <img
                   key={heroPortraitSrc}
                   src={heroPortraitSrc}
@@ -131,7 +136,7 @@ export function Home() {
               {/* Technical Overlay */}
               <div className="absolute -bottom-4 -right-4 bg-brand-surface border border-brand-border p-3 rounded-sm hidden md:block max-w-[14rem]">
                 <div className="flex flex-col gap-1 font-mono text-[8px] text-brand-text-secondary uppercase tracking-widest">
-                  <span>UID: 0x4152_2026</span>
+                  <span>UID: 0x5453_2026</span>
                   {locationLabel ? (
                     <span className="normal-case tracking-normal break-words">BASE: {locationLabel}</span>
                   ) : null}
