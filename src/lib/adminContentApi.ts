@@ -1,0 +1,193 @@
+import { parseListInput } from "./parseListInput";
+
+async function readJson(res: Response) {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+export async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  });
+  const data = await readJson(res);
+  if (!res.ok) {
+    const errObj =
+      data && typeof data === "object"
+        ? (data as Record<string, unknown>)
+        : { error: `HTTP ${res.status} ${res.statusText || ""}`.trim() };
+    if (!("error" in errObj) && !("details" in errObj)) {
+      (errObj as { error: string }).error = `HTTP ${res.status}`;
+    }
+    throw { status: res.status, data: errObj };
+  }
+  return data as T;
+}
+
+export async function apiVoid(url: string, init?: RequestInit): Promise<void> {
+  const res = await fetch(url, init);
+  if (res.status === 204) return;
+  const data = await readJson(res);
+  throw { status: res.status, data: data ?? {} };
+}
+
+export type SiteHomeAdmin = {
+  id: number;
+  portraitImagePath: string;
+  shortIntro: string;
+  heroText: string;
+  technicalFocusTags: string[];
+  contactPreviewLinks: { label: string; url: string }[];
+};
+
+export const adminSiteHome = {
+  get: () => apiJson<SiteHomeAdmin>("/api/admin/site-home"),
+  put: (body: Record<string, unknown>) =>
+    apiJson<SiteHomeAdmin>("/api/admin/site-home", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+};
+
+export type NoteAdmin = {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  category: string;
+  tags: string[];
+  date: string;
+  readTime: string;
+  published: boolean;
+};
+
+export const adminNotes = {
+  list: () => apiJson<NoteAdmin[]>("/api/admin/notes"),
+  get: (id: number) => apiJson<NoteAdmin>(`/api/admin/notes/${id}`),
+  create: (body: Record<string, unknown>) =>
+    apiJson<NoteAdmin>("/api/admin/notes", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  update: (id: number, body: Record<string, unknown>) =>
+    apiJson<NoteAdmin>(`/api/admin/notes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  delete: (id: number) => apiVoid(`/api/admin/notes/${id}`, { method: "DELETE" }),
+};
+
+export type ToolAdmin = {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  link: string;
+  tags: string[];
+  published: boolean;
+  sortOrder: number;
+};
+
+export const adminTools = {
+  list: () => apiJson<ToolAdmin[]>("/api/admin/tools"),
+  create: (body: Record<string, unknown>) =>
+    apiJson<ToolAdmin>("/api/admin/tools", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  update: (id: number, body: Record<string, unknown>) =>
+    apiJson<ToolAdmin>(`/api/admin/tools/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  delete: (id: number) => apiVoid(`/api/admin/tools/${id}`, { method: "DELETE" }),
+};
+
+export type ReadingAdmin = {
+  id: number;
+  title: string;
+  type: string;
+  author: string;
+  link: string;
+  summary: string;
+  category: string;
+  recommended: boolean;
+  sortOrder: number;
+};
+
+export const adminReading = {
+  list: () => apiJson<ReadingAdmin[]>("/api/admin/reading"),
+  create: (body: Record<string, unknown>) =>
+    apiJson<ReadingAdmin>("/api/admin/reading", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  update: (id: number, body: Record<string, unknown>) =>
+    apiJson<ReadingAdmin>(`/api/admin/reading/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  delete: (id: number) => apiVoid(`/api/admin/reading/${id}`, { method: "DELETE" }),
+};
+
+export type ExperienceAdmin = {
+  id: number;
+  company: string;
+  role: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  summary: string;
+  bullets: string[];
+  sortOrder: number;
+};
+
+export type AboutBundleAdmin = {
+  bio: string;
+  currentFocus: string[];
+  stack: { category: string; items: string[] }[];
+  contact: { email: string; location: string; github: string; linkedin: string };
+  experiences: ExperienceAdmin[];
+};
+
+export const adminAbout = {
+  get: () => apiJson<AboutBundleAdmin>("/api/admin/about"),
+  put: (body: Record<string, unknown>) =>
+    apiJson<AboutBundleAdmin>("/api/admin/about", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+};
+
+export const adminExperiences = {
+  create: (body: Record<string, unknown>) =>
+    apiJson<ExperienceAdmin>("/api/admin/experiences", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  update: (id: number, body: Record<string, unknown>) =>
+    apiJson<ExperienceAdmin>(`/api/admin/experiences/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  delete: (id: number) => apiVoid(`/api/admin/experiences/${id}`, { method: "DELETE" }),
+};
+
+export type VisitorLogRow = {
+  id: number;
+  ip: string;
+  path: string;
+  createdAt: string;
+};
+
+export function adminVisitorLogs(limit = 500): Promise<VisitorLogRow[]> {
+  return apiJson<VisitorLogRow[]>(`/api/admin/visitor-logs?limit=${limit}`);
+}
+
+export { parseListInput };
