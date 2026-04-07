@@ -1,0 +1,119 @@
+// SQLite + Prisma — portfolio CMS
+// https://www.prisma.io/docs/concepts/database-connectors/sqlite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  summary     String
+  content     String   @default("")
+  category    String
+  tags        Json
+  coverImage  String
+  gallery     Json
+  githubUrl   String   @default("")
+  demoUrl     String   @default("")
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+}
+
+/// Singleton row id=1 — hero / home CMS fields
+model SiteHome {
+  id                  Int      @id @default(1)
+  portraitImagePath   String   @default("")
+  shortIntro          String   @default("")
+  heroText            String   @default("")
+  technicalFocusTags  Json
+  contactPreviewLinks Json
+  updatedAt           DateTime @updatedAt
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  slug      String   @unique
+  summary   String   @default("")
+  content   String   @default("")
+  category  String   @default("")
+  tags      Json
+  date      String   @default("")
+  readTime  String   @default("")
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tool {
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String   @default("")
+  description String   @default("")
+  link        String   @default("")
+  tags        Json
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ReadingItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  /// Maps to public ReadingItem.status: reading | completed | queued
+  type        String   @default("reading")
+  author      String   @default("")
+  link        String   @default("")
+  summary     String   @default("")
+  category    String   @default("")
+  recommended Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Singleton id=1 — about page text + stack + contact; experiences in separate table
+model AboutPage {
+  id           Int      @id @default(1)
+  bio          String   @default("")
+  currentFocus Json
+  stack        Json
+  contact      Json
+  updatedAt    DateTime @updatedAt
+}
+
+model Experience {
+  id        Int      @id @default(autoincrement())
+  company   String
+  role      String   @default("")
+  startDate String   @default("")
+  endDate   String   @default("")
+  location  String   @default("")
+  summary   String   @default("")
+  bullets   Json
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Public site page views (IP + path + server time)
+model VisitorLog {
+  id        Int      @id @default(autoincrement())
+  ip        String
+  path      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

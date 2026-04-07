@@ -1,11 +1,12 @@
 node_modules/
 build/
 dist/
-deploy/
 server-run.mjs
 coverage/
 .DS_Store
 *.log
 .env*
 !.env.example
-prisma/
+# SQLite DB files only — schema + seed must stay in git
+prisma/*.db
+prisma/*.db-journal
