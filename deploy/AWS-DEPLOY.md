@@ -122,6 +122,49 @@ journalctl -u portfolio -f
 
 ---
 
+## 四-B、用 PM2 常驻（与 systemd 二选一）
+
+**是的：只需要这一个 Node 进程**（`server-run.mjs`）。它同时负责：
+
+- 静态前端 `dist/`
+- 所有 `/api/*`
+- SPA 路由回退到 `index.html`
+
+安装 PM2（全局）：
+
+```bash
+sudo npm install -g pm2
+```
+
+在项目根目录（已有 `server-run.mjs`、`.env`）：
+
+```bash
+cd /var/www/html
+npm run build:prod
+pm2 start ecosystem.config.cjs
+pm2 logs portfolio
+pm2 status
+```
+
+开机自启：
+
+```bash
+pm2 save
+pm2 startup
+# 按屏幕提示执行它打印的一条 sudo 命令
+```
+
+常用：
+
+```bash
+pm2 restart portfolio
+pm2 stop portfolio
+```
+
+`.env` 里的 `PORT`（默认 3000）要与下面 Nginx `proxy_pass` 端口一致。
+
+---
+
 ## 五、Nginx（HTTPS + 反代 API 与 SPA）
 
 1. 安全组：放行 **80、443**；**不要**对公网放行 Node 的 `PORT`（如 3000）、**不要**放行 Prisma Studio **5555**。
@@ -190,6 +233,7 @@ npm ci
 npm run build:prod
 npx prisma db push
 sudo systemctl restart portfolio
+# 若用 PM2：pm2 restart portfolio
 ```
 
 若使用正式迁移而非 `db push`：
