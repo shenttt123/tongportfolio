@@ -6,6 +6,28 @@ import ReactMarkdown from "react-markdown";
 import { cn } from "../lib/utils";
 import { Project } from "../types";
 
+/**
+ * Ensure content renders nicely as Markdown.
+ * - If the text already contains Markdown syntax (headings, bullets, code fences, links),
+ *   leave it untouched.
+ * - Otherwise, treat each non-empty line as a bullet item so plain-text content
+ *   gets visual separation automatically.
+ */
+function ensureMarkdown(text: string): string {
+  if (!text.trim()) return text;
+  const MARKDOWN_HINTS = /^(\s*([-*+]|\d+\.)\s|#{1,6}\s|```|>|\|)/m;
+  if (MARKDOWN_HINTS.test(text)) return text;
+  // Plain text: convert each non-empty line to a bullet
+  return text
+    .split("\n")
+    .map((line) => {
+      const t = line.trim();
+      if (!t) return "";           // blank line between items
+      return `- ${t}`;
+    })
+    .join("\n");
+}
+
 function relativeTime(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
   const days = Math.floor(diff / 86400000);
@@ -39,8 +61,8 @@ function SectionAccordion({ index, label, content }: { index: string; label: str
       </button>
       {open && (
         <div className="pb-10 pr-8 max-w-3xl">
-          <div className="prose prose-invert prose-sm md:prose-base max-w-none">
-            <ReactMarkdown>{content}</ReactMarkdown>
+          <div className="markdown-body">
+            <ReactMarkdown>{ensureMarkdown(content)}</ReactMarkdown>
           </div>
         </div>
       )}
@@ -259,10 +281,8 @@ export function ProjectDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
         <div className="lg:col-span-8">
           {project.content?.trim() && (
-            <div className="prose prose-invert prose-sm md:prose-base max-w-none">
-              <div className="markdown-body">
-                <ReactMarkdown>{project.content}</ReactMarkdown>
-              </div>
+            <div className="markdown-body">
+              <ReactMarkdown>{ensureMarkdown(project.content)}</ReactMarkdown>
             </div>
           )}
 
