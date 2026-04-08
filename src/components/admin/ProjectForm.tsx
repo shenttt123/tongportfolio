@@ -29,6 +29,7 @@ export type ProjectFormState = {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  projectDate: string;
   sectionArchitecture: string;
   sectionHighlights: string;
   sectionSkills: string;
@@ -50,6 +51,7 @@ export const emptyProjectFormState: ProjectFormState = {
   published: true,
   status: "production",
   relatedTo: "",
+  projectDate: "",
   sectionArchitecture: "",
   sectionHighlights: "",
   sectionSkills: "",
@@ -72,6 +74,7 @@ export function projectToFormState(p: Project): ProjectFormState {
     published: p.published,
     status: p.status ?? "production",
     relatedTo: p.relatedTo ?? "",
+    projectDate: p.projectDate ?? "",
     sectionArchitecture: p.sectionArchitecture ?? "",
     sectionHighlights: p.sectionHighlights ?? "",
     sectionSkills: p.sectionSkills ?? "",
@@ -95,6 +98,7 @@ function formStateToApiBody(form: ProjectFormState): Record<string, unknown> {
     published: form.published,
     status: form.status,
     relatedTo: form.relatedTo,
+    projectDate: form.projectDate,
     sectionArchitecture: form.sectionArchitecture,
     sectionHighlights: form.sectionHighlights,
     sectionSkills: form.sectionSkills,
@@ -367,9 +371,23 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             ))}
           </div>
         </div>
-        <div className="sm:col-span-2">
+        <div>
+          <label className={labelCls} htmlFor="projectDate">
+            Project date
+          </label>
+          <input
+            id="projectDate"
+            className={inputCls}
+            type="text"
+            value={form.projectDate}
+            onChange={(e) => set("projectDate", e.target.value)}
+            autoComplete="off"
+            placeholder="e.g. 2023, Jan 2024, 2022–2024"
+          />
+        </div>
+        <div>
           <label className={labelCls} htmlFor="relatedTo">
-            Related to <span className="opacity-50 normal-case">(optional — e.g. Tufts University, personal project)</span>
+            Related to
           </label>
           <input
             id="relatedTo"
@@ -378,7 +396,7 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             value={form.relatedTo}
             onChange={(e) => set("relatedTo", e.target.value)}
             autoComplete="off"
-            placeholder="e.g. Tufts University · School team project"
+            placeholder="e.g. Tufts University"
           />
         </div>
         <div>

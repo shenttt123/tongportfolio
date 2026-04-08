@@ -22,6 +22,7 @@ export type ProjectDto = {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  projectDate: string;
   sectionArchitecture: string;
   sectionHighlights: string;
   sectionSkills: string;
@@ -65,7 +66,7 @@ function normalizeStatus(v: unknown): ProjectStatus {
   return "production";
 }
 
-function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null; sectionArchitecture?: string | null; sectionHighlights?: string | null; sectionSkills?: string | null; sectionNotes?: string | null }): ProjectDto {
+function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null; projectDate?: string | null; sectionArchitecture?: string | null; sectionHighlights?: string | null; sectionSkills?: string | null; sectionNotes?: string | null }): ProjectDto {
   return {
     id: row.id,
     title: row.title,
@@ -82,6 +83,7 @@ function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string
     published: row.published,
     status: normalizeStatus(row.status),
     relatedTo: String(row.relatedTo ?? ""),
+    projectDate: String(row.projectDate ?? ""),
     sectionArchitecture: String(row.sectionArchitecture ?? ""),
     sectionHighlights: String(row.sectionHighlights ?? ""),
     sectionSkills: String(row.sectionSkills ?? ""),
@@ -155,6 +157,7 @@ function validateCreate(body: Record<string, unknown>) {
     published: body.published !== undefined ? Boolean(body.published) : true,
     status: normalizeStatus(body.status),
     relatedTo: normalizeString(body.relatedTo),
+    projectDate: normalizeString(body.projectDate),
     sectionArchitecture: normalizeString(body.sectionArchitecture),
     sectionHighlights: normalizeString(body.sectionHighlights),
     sectionSkills: normalizeString(body.sectionSkills),
@@ -184,6 +187,7 @@ export async function createProject(
         published: data.published,
         status: data.status,
         relatedTo: data.relatedTo,
+        projectDate: data.projectDate,
         sectionArchitecture: data.sectionArchitecture,
         sectionHighlights: data.sectionHighlights,
         sectionSkills: data.sectionSkills,
@@ -264,6 +268,7 @@ export async function updateProject(
         ...(body.published !== undefined && { published: Boolean(body.published) }),
         ...((body.status !== undefined) && { status: normalizeStatus(body.status) } as object),
         ...((body.relatedTo !== undefined) && { relatedTo: normalizeString(body.relatedTo) } as object),
+        ...((body.projectDate !== undefined) && { projectDate: normalizeString(body.projectDate) } as object),
         ...((body.sectionArchitecture !== undefined) && { sectionArchitecture: normalizeString(body.sectionArchitecture) } as object),
         ...((body.sectionHighlights !== undefined) && { sectionHighlights: normalizeString(body.sectionHighlights) } as object),
         ...((body.sectionSkills !== undefined) && { sectionSkills: normalizeString(body.sectionSkills) } as object),

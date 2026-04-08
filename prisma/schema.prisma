@@ -27,6 +27,8 @@ model Project {
   /// "production" | "in_progress" | "archived"
   status      String   @default("production")
   relatedTo   String   @default("")
+  /// Free-form date string set by admin, e.g. "2023", "Jan 2024", "2022–2024"
+  projectDate String   @default("")
   /// Structured content sub-sections (all optional, support Markdown)
   sectionArchitecture String @default("")
   sectionHighlights   String @default("")

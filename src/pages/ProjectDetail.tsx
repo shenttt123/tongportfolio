@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Github, ExternalLink, Calendar, Layers, ChevronDown } from "lucide-react";
+import { ArrowLeft, Github, ExternalLink, Layers, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "../lib/utils";
 import { Project } from "../types";
+
+function relativeTime(isoDate: string): string {
+  const diff = Date.now() - new Date(isoDate).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days < 1) return "today";
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  if (months < 13) return `${months}mo ago`;
+  return `${Math.floor(months / 12)}y ago`;
+}
 
 function SectionAccordion({ index, label, content }: { index: string; label: string; content: string }) {
   const [open, setOpen] = useState(true);
@@ -129,10 +141,15 @@ export function ProjectDetail() {
             <div className="glass p-8 rounded-sm space-y-8">
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-1">
-                  <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest flex items-center gap-2">
-                    <Calendar className="w-3 h-3" /> Created
+                  <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
+                    Date
                   </p>
-                  <p className="text-sm font-medium">{project.createdAt}</p>
+                  <p className="text-sm font-medium">
+                    {project.projectDate?.trim() || project.createdAt}
+                  </p>
+                  <p className="text-[9px] font-mono text-brand-text-secondary/50 tracking-wide">
+                    edited {relativeTime(project.updatedAt)}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest flex items-center gap-2">

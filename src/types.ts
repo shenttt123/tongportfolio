@@ -16,6 +16,7 @@ export interface Project {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  projectDate: string;
   sectionArchitecture: string;
   sectionHighlights: string;
   sectionSkills: string;
