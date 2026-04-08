@@ -24,6 +24,7 @@ model Project {
   demoUrl     String   @default("")
   featured    Boolean  @default(false)
   published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
   /// "production" | "in_progress" | "archived"
   status      String   @default("production")
   relatedTo   String   @default("")

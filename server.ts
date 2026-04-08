@@ -323,6 +323,27 @@ async function startServer() {
     }
   });
 
+  app.put("/api/admin/projects/reorder", async (req, res) => {
+    try {
+      const items = req.body;
+      if (!Array.isArray(items)) {
+        res.status(400).json({ error: "Body must be an array of {id, sortOrder}" });
+        return;
+      }
+      const parsed = (items as { id: unknown; sortOrder: unknown }[])
+        .map(({ id, sortOrder }) => ({
+          id: parseInt(String(id), 10),
+          sortOrder: parseInt(String(sortOrder), 10),
+        }))
+        .filter((x) => !Number.isNaN(x.id) && !Number.isNaN(x.sortOrder));
+      await projectRepo.reorderProjects(parsed);
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to reorder projects", e);
+    }
+  });
+
   app.get("/api/admin/projects/:id", async (req, res) => {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {

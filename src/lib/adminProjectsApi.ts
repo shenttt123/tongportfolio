@@ -88,3 +88,16 @@ export async function adminDeleteProject(id: number): Promise<void> {
   const data = await readErrorBody(res);
   throw { status: res.status, data };
 }
+
+export async function adminReorderProjects(
+  items: { id: number; sortOrder: number }[]
+): Promise<void> {
+  const res = await fetch("/api/admin/projects/reorder", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(items),
+  });
+  if (res.ok) return;
+  const data = await readErrorBody(res);
+  throw { status: res.status, data };
+}

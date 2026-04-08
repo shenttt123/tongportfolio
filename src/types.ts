@@ -2,6 +2,7 @@ export type ProjectStatus = "production" | "in_progress" | "archived";
 
 export interface Project {
   id: number | string;
+  sortOrder: number;
   title: string;
   slug: string;
   summary: string;

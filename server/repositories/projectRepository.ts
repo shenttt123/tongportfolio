@@ -8,6 +8,7 @@ export const PROJECT_STATUSES: ProjectStatus[] = ["production", "in_progress", "
 
 export type ProjectDto = {
   id: number;
+  sortOrder: number;
   title: string;
   slug: string;
   summary: string;
@@ -69,6 +70,7 @@ function normalizeStatus(v: unknown): ProjectStatus {
 function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null; projectDate?: string | null; sectionArchitecture?: string | null; sectionHighlights?: string | null; sectionSkills?: string | null; sectionNotes?: string | null }): ProjectDto {
   return {
     id: row.id,
+    sortOrder: (row as PrismaProject & { sortOrder?: number }).sortOrder ?? 0,
     title: row.title,
     slug: row.slug,
     summary: row.summary,
@@ -102,10 +104,10 @@ function isUniqueConstraintOnSlug(e: Prisma.PrismaClientKnownRequestError): bool
 }
 
 export async function listPublishedProjects(): Promise<ProjectDto[]> {
-  const rows = await prisma.project.findMany({
+  const rows = await (prisma.project.findMany as Function)({
     where: { published: true },
-    orderBy: { id: "asc" },
-  });
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+  }) as PrismaProject[];
   return rows.map(toDto);
 }
 
@@ -118,10 +120,21 @@ export async function getPublishedBySlug(slug: string): Promise<ProjectDto | nul
 
 /** All projects (including unpublished) — admin list. */
 export async function listAllProjects(): Promise<ProjectDto[]> {
-  const rows = await prisma.project.findMany({
-    orderBy: { updatedAt: "desc" },
-  });
+  const rows = await (prisma.project.findMany as Function)({
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+  }) as PrismaProject[];
   return rows.map(toDto);
+}
+
+/** Batch-update sortOrder for a list of {id, sortOrder} pairs. */
+export async function reorderProjects(
+  items: { id: number; sortOrder: number }[]
+): Promise<void> {
+  await Promise.all(
+    items.map(({ id, sortOrder }) =>
+      (prisma.project.update as Function)({ where: { id }, data: { sortOrder } })
+    )
+  );
 }
 
 /** Single project by numeric id — admin edit (ignores published). */
