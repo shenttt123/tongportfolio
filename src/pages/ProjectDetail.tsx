@@ -112,10 +112,12 @@ export function ProjectDetail() {
       <header className="mb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-7 space-y-6">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-1 bg-brand-surface border border-brand-border rounded-sm text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">
-                {project.category}
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              {project.category.split(",").map((c) => c.trim()).filter(Boolean).map((cat) => (
+                <span key={cat} className="px-2 py-1 bg-brand-surface border border-brand-border rounded-sm text-[9px] font-mono uppercase tracking-widest text-brand-text-secondary">
+                  {cat}
+                </span>
+              ))}
               <span className="w-1 h-1 bg-brand-border rounded-full" />
               <span className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
                 ID: 0x{typeof project.id === 'number' ? project.id.toString(16).padStart(4, '0') : project.id}

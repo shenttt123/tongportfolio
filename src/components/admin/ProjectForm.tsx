@@ -209,7 +209,7 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
         </div>
         <div>
           <label className={labelCls} htmlFor="category">
-            Category
+            Category <span className="normal-case opacity-50 text-[10px]">(comma-separated)</span>
           </label>
           <input
             id="category"
@@ -218,6 +218,7 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             onChange={(e) => set("category", e.target.value)}
             required
             autoComplete="off"
+            placeholder="Embedded, Full Stack"
           />
         </div>
         <div className="sm:col-span-2">

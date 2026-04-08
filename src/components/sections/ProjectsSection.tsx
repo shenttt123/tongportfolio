@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, Filter, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { fetchJsonList } from "../../lib/safeFetch";
 import { Project } from "../../types";
 
-const categories = ["All", "Embedded", "IoT", "Full Stack", "Vision", "FPGA"];
+/** Split a raw category string into trimmed, non-empty tokens. */
+function parseCategories(raw: string): string[] {
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
 
 export function ProjectsSection() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -20,10 +23,19 @@ export function ProjectsSection() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredProjects = projects.filter(project => {
-    const matchesCategory = activeCategory === "All" || project.category === activeCategory;
-    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         project.summary.toLowerCase().includes(searchQuery.toLowerCase());
+  /** Sorted unique categories derived from all project.category values. */
+  const categories = useMemo(() => {
+    const all = new Set<string>();
+    projects.forEach((p) => parseCategories(p.category).forEach((c) => all.add(c)));
+    return ["All", ...Array.from(all).sort()];
+  }, [projects]);
+
+  const filteredProjects = projects.filter((project) => {
+    const cats = parseCategories(project.category);
+    const matchesCategory = activeCategory === "All" || cats.includes(activeCategory);
+    const matchesSearch =
+      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.summary.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -109,10 +121,12 @@ export function ProjectsSection() {
                         {project.createdAt.split('-')[0]}
                       </span>
                     </div>
-                    <div className="absolute bottom-4 left-4">
-                      <span className="px-2 py-1 bg-brand-bg/80 backdrop-blur-sm border border-brand-border rounded-sm text-[9px] font-mono uppercase tracking-widest text-white">
-                        {project.category}
-                      </span>
+                    <div className="absolute bottom-4 left-4 flex flex-wrap gap-1">
+                      {parseCategories(project.category).map((cat) => (
+                        <span key={cat} className="px-2 py-1 bg-brand-bg/80 backdrop-blur-sm border border-brand-border rounded-sm text-[9px] font-mono uppercase tracking-widest text-white">
+                          {cat}
+                        </span>
+                      ))}
                     </div>
                   </div>
                   
