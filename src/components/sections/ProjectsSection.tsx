@@ -118,7 +118,7 @@ export function ProjectsSection() {
                     />
                     <div className="absolute top-4 right-4">
                       <span className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
-                        {project.createdAt.split('-')[0]}
+                        {project.projectDate?.trim() || project.createdAt.split('-')[0]}
                       </span>
                     </div>
                     <div className="absolute bottom-4 left-4 flex flex-wrap gap-1">
