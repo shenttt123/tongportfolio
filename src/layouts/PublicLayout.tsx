@@ -4,6 +4,7 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { SiteThemeProvider, useSiteTheme } from "../context/SiteThemeContext";
 import { ThemeLightSwitch } from "../components/ThemeLightSwitch";
+import { NavItemsProvider } from "../context/NavItemsContext";
 
 function PublicLayoutInner() {
   const { mode } = useSiteTheme();
@@ -28,7 +29,9 @@ function PublicLayoutInner() {
 export function PublicLayout() {
   return (
     <SiteThemeProvider>
-      <PublicLayoutInner />
+      <NavItemsProvider>
+        <PublicLayoutInner />
+      </NavItemsProvider>
     </SiteThemeProvider>
   );
 }

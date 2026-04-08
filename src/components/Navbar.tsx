@@ -4,17 +4,7 @@ import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Github, Linkedin, Menu, X } from "lucide-react";
 import type { AboutContent } from "../types";
-
-const navItems = [
-  { name: "Home", id: "home" },
-  { name: "Projects", id: "projects" },
-  { name: "Notes", id: "notes" },
-  { name: "Tools", id: "tools" },
-  { name: "Reading", id: "reading" },
-  { name: "Demos", id: "demos" },
-  { name: "About", id: "about" },
-  { name: "Contact", id: "contact" },
-];
+import { useNavItems } from "../context/NavItemsContext";
 
 const socialBtn =
   "flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md border border-brand-border text-brand-text-secondary hover:text-white hover:bg-brand-surface hover:border-white/25 active:scale-[0.97] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg";
@@ -25,6 +15,8 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [githubField, setGithubField] = useState("");
   const [linkedinField, setLinkedinField] = useState("");
+  const { visibleItems } = useNavItems();
+  const navItems = visibleItems.map((i) => ({ id: i.key, name: i.label }));
 
   useEffect(() => {
     fetch("/api/about")
@@ -55,13 +47,14 @@ export function Navbar() {
       { threshold: 0.5 }
     );
 
-    navItems.forEach((item) => {
-      const element = document.getElementById(item.id);
+    // Always observe home + all visible nav sections
+    ["home", ...navItems.map((i) => i.id)].forEach((id) => {
+      const element = document.getElementById(id);
       if (element) observer.observe(element);
     });
 
     return () => observer.disconnect();
-  }, [location.pathname]);
+  }, [location.pathname, navItems]);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     if (location.pathname !== "/") {

@@ -108,9 +108,30 @@ export function ProjectDetail() {
                   <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest flex items-center gap-2">
                     <Layers className="w-3 h-3" /> Status
                   </p>
-                  <p className="text-sm font-medium text-green-500">Production</p>
+                  <p className={`text-sm font-medium ${
+                    project.status === "in_progress"
+                      ? "text-yellow-400"
+                      : project.status === "archived"
+                      ? "text-brand-text-secondary"
+                      : "text-green-500"
+                  }`}>
+                    {project.status === "in_progress"
+                      ? "In Progress"
+                      : project.status === "archived"
+                      ? "Archived"
+                      : "Production"}
+                  </p>
                 </div>
               </div>
+
+              {project.relatedTo?.trim() ? (
+                <div className="space-y-1 pt-4 border-t border-brand-border">
+                  <p className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest">
+                    Related to
+                  </p>
+                  <p className="text-sm font-light text-brand-text-secondary">{project.relatedTo.trim()}</p>
+                </div>
+              ) : null}
 
               <div className="space-y-4 pt-4 border-t border-brand-border">
                 {project.githubUrl && (

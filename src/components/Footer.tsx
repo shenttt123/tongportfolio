@@ -107,13 +107,22 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="mt-20 pt-8 border-t border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-20 pt-8 border-t border-brand-border flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[10px] font-mono text-brand-text-secondary uppercase tracking-widest">
             © 2026 Tong Shen. All rights reserved.
           </p>
-          <p className="text-[10px] font-mono text-brand-text-secondary uppercase tracking-widest">
-            Built with React & Express
-          </p>
+          <div className="flex items-center gap-1.5 flex-wrap justify-center sm:justify-end">
+            {(["React", "Express", "SQLite", "Prisma", "nginx" ,"AWS EC2"] as const).map((tech, i, arr) => (
+              <span key={tech} className="flex items-center gap-1.5">
+                <span className="text-[9px] font-mono text-brand-text-secondary/50 tracking-[0.18em] uppercase">
+                  {tech}
+                </span>
+                {i < arr.length - 1 && (
+                  <span className="text-brand-border text-[8px] select-none">·</span>
+                )}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

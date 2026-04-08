@@ -2,6 +2,10 @@ import { Prisma, type Project as PrismaProject } from "@prisma/client";
 import { prisma } from "../db";
 
 /** JSON shape returned by /api/projects* — matches src/types.ts Project */
+export type ProjectStatus = "production" | "in_progress" | "archived";
+
+export const PROJECT_STATUSES: ProjectStatus[] = ["production", "in_progress", "archived"];
+
 export type ProjectDto = {
   id: number;
   title: string;
@@ -16,6 +20,8 @@ export type ProjectDto = {
   demoUrl: string;
   featured: boolean;
   published: boolean;
+  status: ProjectStatus;
+  relatedTo: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -50,7 +56,12 @@ export function asStringArray(value: unknown): string[] {
   return value.filter((x): x is string => typeof x === "string");
 }
 
-function toDto(row: PrismaProject): ProjectDto {
+function normalizeStatus(v: unknown): ProjectStatus {
+  if (v === "in_progress" || v === "archived") return v;
+  return "production";
+}
+
+function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null }): ProjectDto {
   return {
     id: row.id,
     title: row.title,
@@ -65,6 +76,8 @@ function toDto(row: PrismaProject): ProjectDto {
     demoUrl: row.demoUrl,
     featured: row.featured,
     published: row.published,
+    status: normalizeStatus(row.status),
+    relatedTo: String(row.relatedTo ?? ""),
     createdAt: row.createdAt.toISOString().slice(0, 10),
     updatedAt: row.updatedAt.toISOString().slice(0, 10),
   };
@@ -107,20 +120,7 @@ export async function getProjectById(id: number): Promise<ProjectDto | null> {
   return row ? toDto(row) : null;
 }
 
-function validateCreate(body: Record<string, unknown>): {
-  title: string;
-  slug: string;
-  summary: string;
-  category: string;
-  content: string;
-  coverImage: string;
-  tags: string[];
-  gallery: string[];
-  githubUrl: string;
-  demoUrl: string;
-  featured: boolean;
-  published: boolean;
-} {
+function validateCreate(body: Record<string, unknown>) {
   const errors: ProjectValidationDetail[] = [];
   const title = normalizeString(body.title);
   const slug = normalizeString(body.slug);
@@ -145,6 +145,8 @@ function validateCreate(body: Record<string, unknown>): {
     demoUrl: normalizeString(body.demoUrl),
     featured: Boolean(body.featured),
     published: body.published !== undefined ? Boolean(body.published) : true,
+    status: normalizeStatus(body.status),
+    relatedTo: normalizeString(body.relatedTo),
   };
 }
 
@@ -154,7 +156,7 @@ export async function createProject(
   const data = validateCreate(body);
 
   try {
-    const row = await prisma.project.create({
+    const row = await (prisma.project.create as Function)({
       data: {
         title: data.title,
         slug: data.slug,
@@ -168,8 +170,10 @@ export async function createProject(
         demoUrl: data.demoUrl,
         featured: data.featured,
         published: data.published,
+        status: data.status,
+        relatedTo: data.relatedTo,
       },
-    });
+    }) as PrismaProject & { status?: string; relatedTo?: string };
     return toDto(row);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && isUniqueConstraintOnSlug(e)) {
@@ -242,6 +246,8 @@ export async function updateProject(
         ...(body.demoUrl !== undefined && { demoUrl: normalizeString(body.demoUrl) }),
         ...(body.featured !== undefined && { featured: Boolean(body.featured) }),
         ...(body.published !== undefined && { published: Boolean(body.published) }),
+        ...((body.status !== undefined) && { status: normalizeStatus(body.status) } as object),
+        ...((body.relatedTo !== undefined) && { relatedTo: normalizeString(body.relatedTo) } as object),
       },
     });
     return toDto(row);

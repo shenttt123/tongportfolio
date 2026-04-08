@@ -86,10 +86,13 @@ export function AdminProjectsList() {
                 Category
               </th>
               <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-brand-text-secondary">
-                Featured
+                Status
               </th>
               <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-brand-text-secondary">
-                Published
+                Related to
+              </th>
+              <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-brand-text-secondary">
+                Pub
               </th>
               <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-widest text-brand-text-secondary">
                 Updated
@@ -102,7 +105,7 @@ export function AdminProjectsList() {
           <tbody>
             {projects.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-brand-text-secondary">
+                <td colSpan={9} className="px-4 py-8 text-center text-brand-text-secondary">
                   No projects yet.{" "}
                   <Link to="/admin/projects/new" className="text-white underline">
                     Create one
@@ -123,8 +126,21 @@ export function AdminProjectsList() {
                       {p.slug}
                     </td>
                     <td className="px-4 py-3 text-brand-text-secondary">{p.category}</td>
-                    <td className="px-4 py-3 text-brand-text-secondary">{p.featured ? "Yes" : "—"}</td>
-                    <td className="px-4 py-3 text-brand-text-secondary">{p.published ? "Yes" : "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wide border ${
+                        p.status === "production"
+                          ? "border-green-700/50 bg-green-950/30 text-green-400"
+                          : p.status === "in_progress"
+                          ? "border-yellow-700/50 bg-yellow-950/30 text-yellow-400"
+                          : "border-brand-border text-brand-text-secondary"
+                      }`}>
+                        {p.status === "in_progress" ? "In Progress" : p.status === "archived" ? "Archived" : "Production"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-brand-text-secondary text-xs max-w-[10rem] truncate">
+                      {p.relatedTo || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-brand-text-secondary">{p.published ? "✓" : "—"}</td>
                     <td className="px-4 py-3 text-brand-text-secondary font-mono text-xs whitespace-nowrap">
                       {p.updatedAt}
                     </td>

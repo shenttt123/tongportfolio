@@ -12,10 +12,18 @@ import * as readingRepo from "./server/repositories/readingRepository";
 import * as aboutRepo from "./server/repositories/aboutRepository";
 import * as visitorLogRepo from "./server/repositories/visitorLogRepository";
 import * as contactInquiryRepo from "./server/repositories/contactInquiryRepository";
+import * as projectImageRepo from "./server/repositories/projectImageRepository";
+import * as navItemRepo from "./server/repositories/navItemRepository";
 import { clientIp } from "./server/lib/clientIp";
 import { adminBasicAuthMiddleware } from "./server/middleware/adminBasicAuth";
 import { jsonError } from "./server/lib/jsonError";
 import { sitePortraitMulter, SITE_PORTRAIT_PUBLIC_PREFIX } from "./server/lib/sitePortraitUpload";
+import {
+  projectImageMulter,
+  PROJECT_IMAGE_PUBLIC_PREFIX,
+  getProjectImageDir,
+  ensureProjectImageDir,
+} from "./server/lib/projectImageUpload";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +86,16 @@ async function startServer() {
   // --- Public APIs ---
 
   app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+  // Public nav items (visible only, sorted)
+  app.get("/api/nav-items", async (_req, res) => {
+    try {
+      res.json(await navItemRepo.listNavItems(true));
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to load nav items", e);
+    }
+  });
 
   app.get("/api/site-home", async (_req, res) => {
     try {
@@ -186,6 +204,30 @@ async function startServer() {
       }
       console.error(e);
       jsonError(res, 500, "Could not save inquiry", e);
+    }
+  });
+
+  // --- Admin: Nav items ---
+  app.get("/api/admin/nav-items", async (_req, res) => {
+    try {
+      res.json(await navItemRepo.listNavItems(false));
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to load nav items", e);
+    }
+  });
+
+  app.put("/api/admin/nav-items", async (req, res) => {
+    try {
+      const updates = req.body;
+      if (!Array.isArray(updates)) {
+        res.status(400).json({ error: "Body must be an array of updates" });
+        return;
+      }
+      res.json(await navItemRepo.updateNavItems(updates));
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to update nav items", e);
     }
   });
 
@@ -607,6 +649,120 @@ async function startServer() {
     } catch (e) {
       console.error(e);
       res.status(500).json({ error: "Could not delete experience" });
+    }
+  });
+
+  // --- Admin: Project images ---
+  ensureProjectImageDir();
+
+  // Upload 1–20 images at once (field name: "files")
+  app.post("/api/admin/project-images/upload", (req, res) => {
+    projectImageMulter.array("files", 20)(req, res, async (err: unknown) => {
+      if (err) {
+        const msg = err instanceof Error ? err.message : "Upload failed";
+        res.status(400).json({ error: msg });
+        return;
+      }
+      const files = req.file
+        ? [req.file]
+        : Array.isArray(req.files)
+        ? (req.files as Express.Multer.File[])
+        : [];
+      if (files.length === 0) {
+        res.status(400).json({ error: "No files uploaded" });
+        return;
+      }
+      const rawProjectId = req.body?.projectId;
+      const projectId =
+        rawProjectId != null && rawProjectId !== ""
+          ? parseInt(String(rawProjectId), 10)
+          : null;
+      try {
+        const created = await Promise.all(
+          files.map((f) =>
+            projectImageRepo.createProjectImage({
+              projectId: Number.isNaN(projectId as number) ? null : projectId,
+              url: `${PROJECT_IMAGE_PUBLIC_PREFIX}/${f.filename}`,
+              filename: f.filename,
+              label: "",
+            })
+          )
+        );
+        res.status(201).json(created);
+      } catch (e) {
+        console.error(e);
+        jsonError(res, 500, "Failed to save image records", e);
+      }
+    });
+  });
+
+  // List all images (or filter by ?projectId=)
+  app.get("/api/admin/project-images", async (req, res) => {
+    try {
+      const pidRaw = req.query.projectId;
+      if (pidRaw != null && pidRaw !== "") {
+        const pid = parseInt(String(pidRaw), 10);
+        res.json(await projectImageRepo.listProjectImages(Number.isNaN(pid) ? null : pid));
+      } else {
+        res.json(await projectImageRepo.listAllProjectImages());
+      }
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to load project images", e);
+    }
+  });
+
+  // Update label
+  app.patch("/api/admin/project-images/:id", async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) { res.status(404).json({ error: "Not found" }); return; }
+    try {
+      const label = typeof req.body?.label === "string" ? req.body.label : "";
+      const row = await projectImageRepo.updateProjectImageLabel(id, label);
+      row ? res.json(row) : res.status(404).json({ error: "Not found" });
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to update image", e);
+    }
+  });
+
+  // Delete single
+  app.delete("/api/admin/project-images/:id", async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) { res.status(404).json({ error: "Not found" }); return; }
+    try {
+      const ok = await projectImageRepo.deleteProjectImage(id, getProjectImageDir());
+      ok ? res.status(204).send() : res.status(404).json({ error: "Not found" });
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to delete image", e);
+    }
+  });
+
+  // Delete bulk — skips images that are currently used in a project
+  app.delete("/api/admin/project-images", async (req, res) => {
+    const ids = req.body?.ids;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: "ids (array) required" });
+      return;
+    }
+    const parsed = (ids as unknown[]).map((x) => parseInt(String(x), 10)).filter((n) => !Number.isNaN(n));
+    try {
+      const inUse = await projectImageRepo.checkImageUsage(parsed);
+      const inUseIds = new Set(inUse.map((u) => u.imageId));
+      const deletable = parsed.filter((id) => !inUseIds.has(id));
+      const deleted = await projectImageRepo.deleteProjectImages(deletable, getProjectImageDir());
+      res.json({
+        deleted,
+        blocked: inUse.map((u) => ({
+          imageId: u.imageId,
+          url: u.url,
+          usedIn: u.usedIn,
+        })),
+      });
+    } catch (e) {
+      console.error(e);
+      jsonError(res, 500, "Failed to delete images", e);
     }
   });
 

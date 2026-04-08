@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { useHomeFullPageScroll } from "../hooks/useHomeFullPageScroll";
+import { useNavItems } from "../context/NavItemsContext";
 import { ProjectsSection } from "../components/sections/ProjectsSection";
 import { NotesSection } from "../components/sections/NotesSection";
 import { ToolsSection } from "../components/sections/ToolsSection";
@@ -23,6 +24,7 @@ const DEFAULT_SHORT_INTRO =
 export function Home() {
   const { pathname } = useLocation();
   useHomeFullPageScroll(pathname === "/");
+  const { isVisible } = useNavItems();
 
   const [heroPortraitSrc, setHeroPortraitSrc] = useState(DEFAULT_HERO_PORTRAIT);
   const [locationLabel, setLocationLabel] = useState("");
@@ -193,14 +195,14 @@ export function Home() {
         </div>
       </section>
 
-      {/* Structured Sections */}
-      <ProjectsSection />
-      <NotesSection />
-      <ToolsSection />
-      <ReadingSection />
-      <DemosSection />
-      <AboutSection />
-      <ContactSection />
+      {/* Structured Sections — only render if visible in nav config */}
+      {isVisible("projects") && <ProjectsSection />}
+      {isVisible("notes")    && <NotesSection />}
+      {isVisible("tools")    && <ToolsSection />}
+      {isVisible("reading")  && <ReadingSection />}
+      {isVisible("demos")    && <DemosSection />}
+      {isVisible("about")    && <AboutSection />}
+      {isVisible("contact")  && <ContactSection />}
     </motion.div>
   );
 }

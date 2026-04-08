@@ -14,6 +14,8 @@ import { AdminDemosPlaceholder } from "../pages/admin/AdminDemosPlaceholder";
 import { AdminAboutPage } from "../pages/admin/AdminAboutPage";
 import { AdminVisitorHistory } from "../pages/admin/AdminVisitorHistory";
 import { AdminContactInquiries } from "../pages/admin/AdminContactInquiries";
+import { AdminProjectImages } from "../pages/admin/AdminProjectImages";
+import { AdminNavPage } from "../pages/admin/AdminNavPage";
 
 function AdminShell() {
   const location = useLocation();
@@ -110,6 +112,8 @@ export function AdminLayout() {
         <Route index element={<Navigate to="home" replace />} />
         <Route path="home" element={<AdminDashboardHome />} />
         <Route path="projects" element={<AdminProjectsList />} />
+        <Route path="project-images" element={<AdminProjectImages />} />
+        <Route path="nav" element={<AdminNavPage />} />
         <Route path="projects/new" element={<AdminProjectNew />} />
         <Route path="projects/:id/edit" element={<AdminProjectEdit />} />
         <Route path="notes" element={<AdminNotesPage />} />

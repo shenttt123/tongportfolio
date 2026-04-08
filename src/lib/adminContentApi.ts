@@ -238,4 +238,62 @@ export function adminContactInquiries(limit = 500): Promise<ContactInquiryRow[]>
   return apiJson<ContactInquiryRow[]>(`/api/admin/contact-inquiries?limit=${limit}`);
 }
 
+export type ProjectImageRow = {
+  id: number;
+  projectId: number | null;
+  url: string;
+  filename: string;
+  label: string;
+  createdAt: string;
+};
+
+export function adminListProjectImages(projectId?: number | null): Promise<ProjectImageRow[]> {
+  const qs = projectId != null ? `?projectId=${projectId}` : "";
+  return apiJson<ProjectImageRow[]>(`/api/admin/project-images${qs}`);
+}
+
+export async function adminUploadProjectImages(
+  files: File[],
+  projectId?: number | null
+): Promise<ProjectImageRow[]> {
+  const form = new FormData();
+  for (const f of files) form.append("files", f);
+  if (projectId != null) form.append("projectId", String(projectId));
+  const res = await fetch("/api/admin/project-images/upload", { method: "POST", body: form });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const errObj = data && typeof data === "object" ? data as Record<string, unknown> : { error: `HTTP ${res.status}` };
+    if (!("error" in errObj)) (errObj as { error: string }).error = `HTTP ${res.status}`;
+    throw { status: res.status, data: errObj };
+  }
+  return data as ProjectImageRow[];
+}
+
+export function adminDeleteProjectImage(id: number): Promise<void> {
+  return apiVoid(`/api/admin/project-images/${id}`, { method: "DELETE" });
+}
+
+export type DeleteProjectImagesResult = {
+  deleted: number;
+  blocked: {
+    imageId: number;
+    url: string;
+    usedIn: { projectId: number; projectTitle: string; field: "coverImage" | "gallery" }[];
+  }[];
+};
+
+export function adminDeleteProjectImages(ids: number[]): Promise<DeleteProjectImagesResult> {
+  return apiJson<DeleteProjectImagesResult>("/api/admin/project-images", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
+  });
+}
+
+export function adminUpdateProjectImageLabel(id: number, label: string): Promise<ProjectImageRow> {
+  return apiJson<ProjectImageRow>(`/api/admin/project-images/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ label }),
+  });
+}
+
 export { parseListInput };

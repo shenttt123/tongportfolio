@@ -1,3 +1,5 @@
+export type ProjectStatus = "production" | "in_progress" | "archived";
+
 export interface Project {
   id: number | string;
   title: string;
@@ -12,6 +14,8 @@ export interface Project {
   demoUrl: string;
   featured: boolean;
   published: boolean;
+  status: ProjectStatus;
+  relatedTo: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Project } from "../../types";
+import { Images } from "lucide-react";
+import type { Project, ProjectStatus } from "../../types";
 import { parseListInput } from "../../lib/parseListInput";
 import { useAdminSaveFeedback } from "../../context/AdminSaveFeedbackContext";
 import {
@@ -7,6 +8,13 @@ import {
   adminUpdateProject,
   formatApiError,
 } from "../../lib/adminProjectsApi";
+import { ImagePickerModal } from "./ImagePickerModal";
+
+const PROJECT_STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
+  { value: "production", label: "Production" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "archived", label: "Archived" },
+];
 
 export type ProjectFormState = {
   title: string;
@@ -19,6 +27,8 @@ export type ProjectFormState = {
   demoUrl: string;
   featured: boolean;
   published: boolean;
+  status: ProjectStatus;
+  relatedTo: string;
   tagsText: string;
   galleryText: string;
 };
@@ -34,6 +44,8 @@ export const emptyProjectFormState: ProjectFormState = {
   demoUrl: "",
   featured: false,
   published: true,
+  status: "production",
+  relatedTo: "",
   tagsText: "",
   galleryText: "",
 };
@@ -50,6 +62,8 @@ export function projectToFormState(p: Project): ProjectFormState {
     demoUrl: p.demoUrl,
     featured: p.featured,
     published: p.published,
+    status: p.status ?? "production",
+    relatedTo: p.relatedTo ?? "",
     tagsText: p.tags.join("\n"),
     galleryText: p.gallery.join("\n"),
   };
@@ -67,6 +81,8 @@ function formStateToApiBody(form: ProjectFormState): Record<string, unknown> {
     demoUrl: form.demoUrl,
     featured: form.featured,
     published: form.published,
+    status: form.status,
+    relatedTo: form.relatedTo,
     tags: parseListInput(form.tagsText),
     gallery: parseListInput(form.galleryText),
   };
@@ -85,11 +101,14 @@ type Props = {
   onCancel: () => void;
 };
 
+type PickerTarget = "cover" | "gallery" | null;
+
 export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: Props) {
   const { notify } = useAdminSaveFeedback();
   const [form, setForm] = useState<ProjectFormState>(initial);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
 
   useEffect(() => {
     setForm(initial);
@@ -202,14 +221,34 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
           <label className={labelCls} htmlFor="coverImage">
             Cover image URL
           </label>
-          <input
-            id="coverImage"
-            className={inputCls}
-            type="text"
-            value={form.coverImage}
-            onChange={(e) => set("coverImage", e.target.value)}
-            autoComplete="off"
-          />
+          <div className="flex gap-2">
+            <input
+              id="coverImage"
+              className={inputCls}
+              type="text"
+              value={form.coverImage}
+              onChange={(e) => set("coverImage", e.target.value)}
+              autoComplete="off"
+              placeholder="https://… or pick from library →"
+            />
+            <button
+              type="button"
+              onClick={() => setPickerTarget("cover")}
+              title="Pick from image library"
+              className="shrink-0 flex items-center gap-1.5 rounded border border-brand-border px-3 py-2 text-xs text-brand-text-secondary hover:text-white hover:bg-brand-surface transition-colors whitespace-nowrap"
+            >
+              <Images className="w-3.5 h-3.5" />
+              Library
+            </button>
+          </div>
+          {form.coverImage && (
+            <img
+              src={form.coverImage}
+              alt="Cover preview"
+              className="mt-2 h-20 w-auto rounded border border-brand-border object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+          )}
         </div>
         <div>
           <label className={labelCls} htmlFor="githubUrl">
@@ -235,6 +274,43 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             value={form.demoUrl}
             onChange={(e) => set("demoUrl", e.target.value)}
             autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className={labelCls}>Status</label>
+          <div className="flex gap-2 flex-wrap">
+            {PROJECT_STATUS_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set("status", opt.value)}
+                className={`px-3 py-1.5 text-xs font-mono rounded border transition-colors ${
+                  form.status === opt.value
+                    ? opt.value === "production"
+                      ? "border-green-500/60 bg-green-950/40 text-green-400"
+                      : opt.value === "in_progress"
+                      ? "border-yellow-500/60 bg-yellow-950/40 text-yellow-400"
+                      : "border-brand-border bg-brand-surface text-brand-text-secondary"
+                    : "border-brand-border text-brand-text-secondary hover:border-white/20 hover:text-white"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="sm:col-span-2">
+          <label className={labelCls} htmlFor="relatedTo">
+            Related to <span className="opacity-50 normal-case">(optional — e.g. Tufts University, personal project)</span>
+          </label>
+          <input
+            id="relatedTo"
+            className={inputCls}
+            type="text"
+            value={form.relatedTo}
+            onChange={(e) => set("relatedTo", e.target.value)}
+            autoComplete="off"
+            placeholder="e.g. Tufts University · School team project"
           />
         </div>
         <div>
@@ -273,9 +349,20 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
           />
         </div>
         <div className="sm:col-span-2">
-          <label className={labelCls} htmlFor="galleryText">
-            Gallery image URLs (one per line or comma-separated)
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className={`${labelCls} mb-0`} htmlFor="galleryText">
+              Gallery image URLs (one per line or comma-separated)
+            </label>
+            <button
+              type="button"
+              onClick={() => setPickerTarget("gallery")}
+              title="Pick from image library"
+              className="flex items-center gap-1.5 rounded border border-brand-border px-3 py-1 text-xs text-brand-text-secondary hover:text-white hover:bg-brand-surface transition-colors whitespace-nowrap"
+            >
+              <Images className="w-3.5 h-3.5" />
+              Library
+            </button>
+          </div>
           <textarea
             id="galleryText"
             className={textareaCls}
@@ -284,8 +371,42 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             onChange={(e) => set("galleryText", e.target.value)}
             placeholder="https://…"
           />
+          {/* Gallery thumbnails preview */}
+          {parseListInput(form.galleryText).length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {parseListInput(form.galleryText).map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Gallery ${i + 1}`}
+                  className="h-14 w-14 rounded border border-brand-border object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {pickerTarget && (
+        <ImagePickerModal
+          mode={pickerTarget === "cover" ? "single" : "multi"}
+          currentUrls={
+            pickerTarget === "cover"
+              ? form.coverImage ? [form.coverImage] : []
+              : parseListInput(form.galleryText)
+          }
+          projectId={projectId ?? null}
+          onConfirm={(urls) => {
+            if (pickerTarget === "cover") {
+              set("coverImage", urls[0] ?? "");
+            } else {
+              set("galleryText", urls.join("\n"));
+            }
+          }}
+          onClose={() => setPickerTarget(null)}
+        />
+      )}
 
       <div className="flex flex-wrap gap-3 pt-2">
         <button

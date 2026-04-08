@@ -8,6 +8,8 @@ const active = "text-white bg-brand-surface border-brand-border";
 export const ADMIN_NAV_ITEMS: { to: string; label: string }[] = [
   { to: "/admin/home", label: "Home" },
   { to: "/admin/projects", label: "Projects" },
+  { to: "/admin/project-images", label: "Images" },
+  { to: "/admin/nav", label: "Nav tabs" },
   { to: "/admin/notes", label: "Notes" },
   { to: "/admin/tools", label: "Tools" },
   { to: "/admin/reading", label: "Reading" },

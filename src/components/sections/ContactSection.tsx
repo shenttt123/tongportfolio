@@ -75,24 +75,47 @@ export function ContactSection() {
             </p>
             
             <div className="space-y-6 pt-8">
-              <a
-                href={
-                  contact?.email?.trim()
-                    ? `mailto:${contact.email.trim()}`
-                    : "#contact"
-                }
-                className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
-              >
-                <div className="w-10 h-10 bg-brand-surface border border-brand-border rounded-sm flex items-center justify-center group-hover:border-white/20 transition-all">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">Email</span>
-                  <span className="text-sm font-light break-all">
-                    {contact?.email?.trim() || "Use the form on the right →"}
-                  </span>
-                </div>
-              </a>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={
+                    contact?.email?.trim()
+                      ? `mailto:${contact.email.trim()}`
+                      : "#contact"
+                  }
+                  className="flex items-center gap-4 text-brand-text-secondary group hover:text-white transition-colors"
+                >
+                  <div className="w-10 h-10 bg-brand-surface border border-brand-border rounded-sm flex items-center justify-center group-hover:border-white/20 transition-all">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[9px] font-mono uppercase tracking-widest opacity-50">Email</span>
+                    <span className="text-sm font-light break-all">
+                      {contact?.email?.trim() || "Use the form on the right →"}
+                    </span>
+                  </div>
+                </a>
+
+                {contact?.email?.trim() && (
+                  <div className="flex gap-2 pl-14 flex-wrap">
+                    <a
+                      href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(contact.email.trim())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary hover:text-white border border-brand-border hover:border-white/20 px-2 py-1 rounded-sm transition-all"
+                    >
+                      Gmail
+                    </a>
+                    <a
+                      href={`https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(contact.email.trim())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary hover:text-white border border-brand-border hover:border-white/20 px-2 py-1 rounded-sm transition-all"
+                    >
+                      Outlook
+                    </a>
+                  </div>
+                )}
+              </div>
 
               <a
                 href={gh || "https://github.com"}
@@ -193,7 +216,7 @@ export function ContactSection() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full bg-brand-bg border border-brand-border rounded-sm px-4 py-3 text-sm font-light focus:outline-none focus:border-white/20 transition-all resize-none"
-                    placeholder="Tell me about your project..."
+                    placeholder="Tell me about what you want to discuss."
                   />
                 </div>
 
