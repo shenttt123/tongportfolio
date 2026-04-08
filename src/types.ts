@@ -16,6 +16,10 @@ export interface Project {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  sectionArchitecture: string;
+  sectionHighlights: string;
+  sectionSkills: string;
+  sectionNotes: string;
   createdAt: string;
   updatedAt: string;
 }

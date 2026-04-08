@@ -22,6 +22,10 @@ export type ProjectDto = {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  sectionArchitecture: string;
+  sectionHighlights: string;
+  sectionSkills: string;
+  sectionNotes: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -61,7 +65,7 @@ function normalizeStatus(v: unknown): ProjectStatus {
   return "production";
 }
 
-function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null }): ProjectDto {
+function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string | null; sectionArchitecture?: string | null; sectionHighlights?: string | null; sectionSkills?: string | null; sectionNotes?: string | null }): ProjectDto {
   return {
     id: row.id,
     title: row.title,
@@ -78,6 +82,10 @@ function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string
     published: row.published,
     status: normalizeStatus(row.status),
     relatedTo: String(row.relatedTo ?? ""),
+    sectionArchitecture: String(row.sectionArchitecture ?? ""),
+    sectionHighlights: String(row.sectionHighlights ?? ""),
+    sectionSkills: String(row.sectionSkills ?? ""),
+    sectionNotes: String(row.sectionNotes ?? ""),
     createdAt: row.createdAt.toISOString().slice(0, 10),
     updatedAt: row.updatedAt.toISOString().slice(0, 10),
   };
@@ -147,6 +155,10 @@ function validateCreate(body: Record<string, unknown>) {
     published: body.published !== undefined ? Boolean(body.published) : true,
     status: normalizeStatus(body.status),
     relatedTo: normalizeString(body.relatedTo),
+    sectionArchitecture: normalizeString(body.sectionArchitecture),
+    sectionHighlights: normalizeString(body.sectionHighlights),
+    sectionSkills: normalizeString(body.sectionSkills),
+    sectionNotes: normalizeString(body.sectionNotes),
   };
 }
 
@@ -172,8 +184,12 @@ export async function createProject(
         published: data.published,
         status: data.status,
         relatedTo: data.relatedTo,
+        sectionArchitecture: data.sectionArchitecture,
+        sectionHighlights: data.sectionHighlights,
+        sectionSkills: data.sectionSkills,
+        sectionNotes: data.sectionNotes,
       },
-    }) as PrismaProject & { status?: string; relatedTo?: string };
+    }) as PrismaProject & { status?: string; relatedTo?: string; sectionArchitecture?: string; sectionHighlights?: string; sectionSkills?: string; sectionNotes?: string };
     return toDto(row);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && isUniqueConstraintOnSlug(e)) {
@@ -248,6 +264,10 @@ export async function updateProject(
         ...(body.published !== undefined && { published: Boolean(body.published) }),
         ...((body.status !== undefined) && { status: normalizeStatus(body.status) } as object),
         ...((body.relatedTo !== undefined) && { relatedTo: normalizeString(body.relatedTo) } as object),
+        ...((body.sectionArchitecture !== undefined) && { sectionArchitecture: normalizeString(body.sectionArchitecture) } as object),
+        ...((body.sectionHighlights !== undefined) && { sectionHighlights: normalizeString(body.sectionHighlights) } as object),
+        ...((body.sectionSkills !== undefined) && { sectionSkills: normalizeString(body.sectionSkills) } as object),
+        ...((body.sectionNotes !== undefined) && { sectionNotes: normalizeString(body.sectionNotes) } as object),
       },
     });
     return toDto(row);

@@ -29,6 +29,10 @@ export type ProjectFormState = {
   published: boolean;
   status: ProjectStatus;
   relatedTo: string;
+  sectionArchitecture: string;
+  sectionHighlights: string;
+  sectionSkills: string;
+  sectionNotes: string;
   tagsText: string;
   galleryText: string;
 };
@@ -46,6 +50,10 @@ export const emptyProjectFormState: ProjectFormState = {
   published: true,
   status: "production",
   relatedTo: "",
+  sectionArchitecture: "",
+  sectionHighlights: "",
+  sectionSkills: "",
+  sectionNotes: "",
   tagsText: "",
   galleryText: "",
 };
@@ -64,6 +72,10 @@ export function projectToFormState(p: Project): ProjectFormState {
     published: p.published,
     status: p.status ?? "production",
     relatedTo: p.relatedTo ?? "",
+    sectionArchitecture: p.sectionArchitecture ?? "",
+    sectionHighlights: p.sectionHighlights ?? "",
+    sectionSkills: p.sectionSkills ?? "",
+    sectionNotes: p.sectionNotes ?? "",
     tagsText: p.tags.join("\n"),
     galleryText: p.gallery.join("\n"),
   };
@@ -83,6 +95,10 @@ function formStateToApiBody(form: ProjectFormState): Record<string, unknown> {
     published: form.published,
     status: form.status,
     relatedTo: form.relatedTo,
+    sectionArchitecture: form.sectionArchitecture,
+    sectionHighlights: form.sectionHighlights,
+    sectionSkills: form.sectionSkills,
+    sectionNotes: form.sectionNotes,
     tags: parseListInput(form.tagsText),
     gallery: parseListInput(form.galleryText),
   };
@@ -103,12 +119,20 @@ type Props = {
 
 type PickerTarget = "cover" | "gallery" | null;
 
+const SECTION_TABS = [
+  { key: "sectionArchitecture" as const, label: "System Architecture" },
+  { key: "sectionHighlights"   as const, label: "Technical Highlights" },
+  { key: "sectionSkills"       as const, label: "Skills" },
+  { key: "sectionNotes"        as const, label: "Notes" },
+] as const;
+
 export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: Props) {
   const { notify } = useAdminSaveFeedback();
   const [form, setForm] = useState<ProjectFormState>(initial);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
+  const [activeSection, setActiveSection] = useState<typeof SECTION_TABS[number]["key"] | null>(null);
 
   useEffect(() => {
     setForm(initial);
@@ -207,7 +231,7 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
         </div>
         <div className="sm:col-span-2">
           <label className={labelCls} htmlFor="content">
-            Content
+            Content <span className="normal-case opacity-50 text-[10px]">(overview / intro, supports Markdown)</span>
           </label>
           <textarea
             id="content"
@@ -217,6 +241,50 @@ export function ProjectForm({ mode, projectId, initial, onSuccess, onCancel }: P
             onChange={(e) => set("content", e.target.value)}
           />
         </div>
+
+        {/* Structured sub-sections */}
+        <div className="sm:col-span-2">
+          <p className={labelCls}>Detailed sections <span className="normal-case opacity-50 text-[10px]">(optional — each supports Markdown)</span></p>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {SECTION_TABS.map((tab) => {
+              const hasContent = !!form[tab.key].trim();
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveSection(activeSection === tab.key ? null : tab.key)}
+                  className={`px-3 py-1.5 text-xs font-mono rounded border transition-colors relative ${
+                    activeSection === tab.key
+                      ? "border-white/40 bg-white/10 text-white"
+                      : "border-brand-border text-brand-text-secondary hover:border-white/20 hover:text-white"
+                  }`}
+                >
+                  {tab.label}
+                  {hasContent && (
+                    <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-green-500 rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {activeSection && (
+            <div className="border border-brand-border rounded">
+              <div className="px-3 py-2 bg-brand-surface/60 border-b border-brand-border">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary">
+                  {SECTION_TABS.find((t) => t.key === activeSection)?.label}
+                </span>
+              </div>
+              <textarea
+                className={`${textareaCls} rounded-none border-0 focus:ring-0 min-h-[200px]`}
+                rows={10}
+                value={form[activeSection]}
+                onChange={(e) => set(activeSection, e.target.value)}
+                placeholder={`Write ${SECTION_TABS.find((t) => t.key === activeSection)?.label} content in Markdown…`}
+              />
+            </div>
+          )}
+        </div>
+
         <div className="sm:col-span-2">
           <label className={labelCls} htmlFor="coverImage">
             Cover image URL

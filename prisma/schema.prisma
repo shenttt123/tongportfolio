@@ -27,6 +27,11 @@ model Project {
   /// "production" | "in_progress" | "archived"
   status      String   @default("production")
   relatedTo   String   @default("")
+  /// Structured content sub-sections (all optional, support Markdown)
+  sectionArchitecture String @default("")
+  sectionHighlights   String @default("")
+  sectionSkills       String @default("")
+  sectionNotes        String @default("")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

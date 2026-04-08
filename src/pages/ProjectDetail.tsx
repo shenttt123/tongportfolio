@@ -1,10 +1,40 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowLeft, Github, ExternalLink, Calendar, Tag, Layers } from "lucide-react";
+import { ArrowLeft, Github, ExternalLink, Calendar, Layers, ChevronDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "../lib/utils";
 import { Project } from "../types";
+
+function SectionAccordion({ index, label, content }: { index: string; label: string; content: string }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="border-b border-brand-border">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between py-6 text-left group"
+      >
+        <div className="flex items-center gap-4">
+          <span className="text-[9px] font-mono text-brand-text-secondary tracking-widest">{index}</span>
+          <h2 className="text-base font-medium tracking-tight text-white group-hover:text-white/80 transition-colors">
+            {label}
+          </h2>
+        </div>
+        <ChevronDown
+          className={`w-4 h-4 text-brand-text-secondary transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="pb-10 pr-8 max-w-3xl">
+          <div className="prose prose-invert prose-sm md:prose-base max-w-none">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ProjectDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -180,27 +210,55 @@ export function ProjectDetail() {
         </div>
       </section>
 
+      {/* Structured detail sections */}
+      {(() => {
+        const sections = [
+          { key: "sectionArchitecture", label: "System Architecture",   index: "01" },
+          { key: "sectionHighlights",   label: "Technical Highlights",  index: "02" },
+          { key: "sectionSkills",       label: "Skills",                index: "03" },
+          { key: "sectionNotes",        label: "Notes",                 index: "04" },
+        ] as const;
+        const visibleSections = sections.filter(
+          (s) => project[s.key as keyof typeof project]?.toString().trim()
+        );
+        if (visibleSections.length === 0) return null;
+        return (
+          <div className="mb-24 space-y-0 border-t border-brand-border">
+            {visibleSections.map((s) => (
+              <SectionAccordion
+                key={s.key}
+                index={s.index}
+                label={s.label}
+                content={project[s.key as keyof typeof project] as string}
+              />
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Content & Gallery */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
         <div className="lg:col-span-8">
-          <div className="prose prose-invert prose-sm md:prose-base max-w-none">
-            <div className="markdown-body">
-              <ReactMarkdown>{project.content}</ReactMarkdown>
+          {project.content?.trim() && (
+            <div className="prose prose-invert prose-sm md:prose-base max-w-none">
+              <div className="markdown-body">
+                <ReactMarkdown>{project.content}</ReactMarkdown>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Gallery */}
           {project.gallery && project.gallery.length > 0 && (
-            <section className="mt-24 pt-24 border-t border-brand-border">
+            <section className={project.content?.trim() ? "mt-24 pt-24 border-t border-brand-border" : ""}>
               <h2 className="text-xs font-mono uppercase tracking-[0.3em] text-brand-text-secondary mb-12 flex items-center gap-3">
-                <span className="w-4 h-px bg-brand-border" /> 01 / Visual Documentation
+                <span className="w-4 h-px bg-brand-border" /> Visual Documentation
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {project.gallery.map((img, i) => (
                   <div key={i} className="aspect-[4/3] bg-brand-surface border border-brand-border rounded-sm overflow-hidden group">
                     <img
                       src={img}
-                      alt={`Gallery ${i}`}
+                      alt={`Gallery ${i + 1}`}
                       className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-700"
                       referrerPolicy="no-referrer"
                     />
@@ -211,31 +269,7 @@ export function ProjectDetail() {
           )}
         </div>
 
-        <div className="lg:col-span-4">
-          <div className="sticky top-32 space-y-12">
-            <section>
-              <h2 className="text-xs font-mono uppercase tracking-[0.3em] text-brand-text-secondary mb-8">
-                Related Entries
-              </h2>
-              <div className="space-y-6">
-                {[1, 2].map((i) => (
-                  <Link
-                    key={i}
-                    to={`/projects/related-${i}`}
-                    className="block p-6 bg-brand-surface border border-brand-border rounded-sm hover:border-white/20 transition-all group"
-                  >
-                    <span className="text-[9px] font-mono text-brand-text-secondary uppercase tracking-widest mb-2 block">
-                      Embedded / 2024
-                    </span>
-                    <h4 className="text-sm font-medium group-hover:text-white transition-colors">
-                      Industrial Sensor Node v{i}.0
-                    </h4>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          </div>
-        </div>
+        <div className="lg:col-span-4" />
       </div>
     </motion.div>
   );
