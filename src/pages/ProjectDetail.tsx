@@ -108,7 +108,7 @@ export function ProjectDetail() {
       <div className="max-w-7xl mx-auto px-6 py-32 text-center">
         <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
         <Link to="/projects" className="text-brand-text-secondary hover:text-white underline">
-          Return to Archive
+          Return to Home
         </Link>
       </div>
     );
@@ -127,7 +127,7 @@ export function ProjectDetail() {
         className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-brand-text-secondary hover:text-white mb-12 transition-colors group"
       >
         <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-        Back to Archive
+        Back to Home
       </Link>
 
       {/* Project Header */}

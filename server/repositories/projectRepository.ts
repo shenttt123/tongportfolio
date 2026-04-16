@@ -90,8 +90,8 @@ function toDto(row: PrismaProject & { status?: string | null; relatedTo?: string
     sectionHighlights: String(row.sectionHighlights ?? ""),
     sectionSkills: String(row.sectionSkills ?? ""),
     sectionNotes: String(row.sectionNotes ?? ""),
-    createdAt: row.createdAt.toISOString().slice(0, 10),
-    updatedAt: row.updatedAt.toISOString().slice(0, 10),
+    createdAt: row.createdAt.toISOString().slice(0, 10),  // date-only for display
+    updatedAt: row.updatedAt.toISOString(),               // full timestamp for relativeTime()
   };
 }
 
@@ -130,9 +130,10 @@ export async function listAllProjects(): Promise<ProjectDto[]> {
 export async function reorderProjects(
   items: { id: number; sortOrder: number }[]
 ): Promise<void> {
-  await Promise.all(
+  // Use raw SQL so Prisma does not refresh @updatedAt — reordering is not a "content edit".
+  await prisma.$transaction(
     items.map(({ id, sortOrder }) =>
-      (prisma.project.update as Function)({ where: { id }, data: { sortOrder } })
+      prisma.$executeRaw`UPDATE Project SET sortOrder = ${sortOrder} WHERE id = ${id}`
     )
   );
 }
