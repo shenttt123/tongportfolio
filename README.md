@@ -1,20 +1,71 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Personal Portfolio Website
 
-This contains everything you need to run your app locally.
+This repository contains the source code for my personal portfolio website.
 
-View your app in AI Studio: https://ai.studio/apps/b26b274d-57de-4188-9af6-0befd8649ecd
+Live site: https://tongshen14.com
+
+The website presents my work in embedded systems, firmware engineering, and full-stack development. It also includes technical notes, tools, and ongoing projects.
+
+---
+
+## Overview
+
+This project is designed as a centralized platform to showcase:
+
+- Embedded and firmware engineering projects
+- End-to-end systems (device → firmware → backend → UI)
+- Technical notes and documentation
+- Experimental tools and prototypes
+- A custom admin system for content management
+
+The goal is to maintain a practical, engineering-focused portfolio that reflects real-world system design and debugging experience.
+
+---
+
+## Features
+
+- Project showcase with detailed descriptions
+- Notes and technical writeups
+- Tools and experimental utilities
+- Admin panel for managing content
+- AI integration using Gemini API
+- Dark UI design inspired by modern developer tools
+- Structured for continuous updates and expansion
+
+---
+
+## Tech Stack
+
+Frontend:
+- React
+- Tailwind CSS
+
+Backend:
+- Node.js (Express)
+
+Database:
+- Prisma ORM
+- SQLite (development)
+
+Infrastructure:
+- AWS EC2
+- Nginx (reverse proxy)
+- PM2 (process manager)
+- Let's Encrypt (HTTPS)
+
+---
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+### Prerequisites
 
+- Node.js
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Setup and Run (one command)
+
+```bash
+npm install && cp .env.example .env.local && npm run dev
